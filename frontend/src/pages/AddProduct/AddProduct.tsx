@@ -1,0 +1,183 @@
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import Slider from '@mui/material/Slider'
+import TextField from '@mui/material/TextField'
+import { useGetProductByCodeQuery } from '@/services/productsApi'
+import { paths } from '@/routes/paths'
+import {
+  AddProductWrapper,
+  CenteredState,
+  ChipsRow,
+  Form,
+  ProductBrand,
+  ProductHeader,
+  ProductInfo,
+  ProductName,
+  ProductPhoto,
+  ProductPhotoPlaceholder,
+  SectionTitle,
+  SliderLabel,
+  SliderRow,
+} from './AddProduct.styles'
+
+/** Convierte un tag de Open Food Facts (ej. "en:whole-milk") en texto legible. */
+const formatTag = (tag: string) => {
+  const withoutPrefix = tag.includes(':') ? tag.split(':')[1] : tag
+  return withoutPrefix.replace(/-/g, ' ')
+}
+
+export const AddProduct = () => {
+  const { code = '' } = useParams<{ code: string }>()
+  const navigate = useNavigate()
+  const { data, isLoading, isError, error } = useGetProductByCodeQuery(code, { skip: !code })
+
+  // Campos que el usuario tiene que rellenar a mano: Open Food Facts no los provee.
+  // `undefined` significa "aún no tocado por el usuario", así que se muestra el valor
+  // sugerido a partir de los datos de Open Food Facts sin necesitar un efecto.
+  const [description, setDescription] = useState<string>()
+  const [quantityRemaining, setQuantityRemaining] = useState(100)
+  const [expirationDate, setExpirationDate] = useState('')
+  const [category, setCategory] = useState<string>()
+  const [comment, setComment] = useState('')
+
+  const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
+  const suggestedCategory = data?.productCategories?.[0] ? formatTag(data.productCategories[0]) : ''
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+    // TODO: no existe todavía un endpoint para persistir el producto en la nevera.
+    navigate(paths.fridge)
+  }
+
+  if (!code) {
+    return (
+      <AddProductWrapper>
+        <CenteredState>
+          <p>No se ha detectado ningún código de barras.</p>
+          <Button variant="contained" onClick={() => navigate(paths.scanBarcode)}>
+            Escanear código
+          </Button>
+        </CenteredState>
+      </AddProductWrapper>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <AddProductWrapper>
+        <CenteredState>
+          <CircularProgress />
+          <p>Buscando producto con código {code}…</p>
+        </CenteredState>
+      </AddProductWrapper>
+    )
+  }
+
+  if (isError || !data) {
+    const message =
+      error && 'status' in error && error.status === 404
+        ? 'No se ha encontrado ningún producto con ese código.'
+        : 'No se ha podido consultar el producto. Inténtalo de nuevo.'
+
+    return (
+      <AddProductWrapper>
+        <CenteredState>
+          <p>{message}</p>
+          <Button variant="contained" onClick={() => navigate(paths.scanBarcode)}>
+            Volver a escanear
+          </Button>
+        </CenteredState>
+      </AddProductWrapper>
+    )
+  }
+
+  const photoUrl = data.productImageFrontUrl ?? data.productImage
+  const displayName = data.productName || data.productGenericNameEs || data.productGenericName || 'Producto sin nombre'
+
+  return (
+    <AddProductWrapper>
+      <ProductHeader>
+        {photoUrl ? <ProductPhoto src={photoUrl} alt={displayName} /> : <ProductPhotoPlaceholder />}
+
+        <ProductInfo>
+          <ProductName>{displayName}</ProductName>
+          {data.productBrands && <ProductBrand>{data.productBrands}</ProductBrand>}
+          {data.productQuantity && <ProductBrand>Contenido del envase: {data.productQuantity}</ProductBrand>}
+
+          <ChipsRow>
+            {data.productNutriscore && <Chip size="small" label={`Nutri-Score ${data.productNutriscore.toUpperCase()}`} />}
+            {data.productEcoscore && <Chip size="small" label={`Eco-Score ${data.productEcoscore.toUpperCase()}`} />}
+            {data.productNovaGroup && <Chip size="small" label={`Nova ${data.productNovaGroup}`} />}
+          </ChipsRow>
+
+          {(data.productAllergens?.length ?? 0) > 0 && (
+            <ChipsRow>
+              {data.productAllergens!.map((allergen) => (
+                <Chip key={allergen} size="small" color="warning" variant="outlined" label={formatTag(allergen)} />
+              ))}
+            </ChipsRow>
+          )}
+        </ProductInfo>
+      </ProductHeader>
+
+      <SectionTitle>Datos de la nevera</SectionTitle>
+
+      <Form onSubmit={handleSubmit}>
+        <TextField
+          label="Descripción"
+          value={description ?? suggestedDescription}
+          onChange={(event) => setDescription(event.target.value)}
+          multiline
+          minRows={2}
+          fullWidth
+        />
+
+        <TextField
+          label="Categoría"
+          value={category ?? suggestedCategory}
+          onChange={(event) => setCategory(event.target.value)}
+          fullWidth
+        />
+
+        <TextField
+          label="Fecha de caducidad"
+          type="date"
+          value={expirationDate}
+          onChange={(event) => setExpirationDate(event.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
+          fullWidth
+        />
+
+        <SliderRow>
+          <SliderLabel>
+            <span>Cantidad restante</span>
+            <span>{quantityRemaining}%</span>
+          </SliderLabel>
+          <Slider
+            value={quantityRemaining}
+            onChange={(_event, value) => setQuantityRemaining(value as number)}
+            min={0}
+            max={100}
+            step={5}
+          />
+        </SliderRow>
+
+        <TextField
+          label="Comentario (opcional)"
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+          multiline
+          minRows={2}
+          fullWidth
+        />
+
+        <Button type="submit" variant="contained" fullWidth>
+          Guardar en la nevera
+        </Button>
+      </Form>
+    </AddProductWrapper>
+  )
+}

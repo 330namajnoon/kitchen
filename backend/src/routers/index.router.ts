@@ -1,5 +1,6 @@
 import type { RouterDefinition } from "sm-express-server";
 
 import { healthRouter } from "@/routers/health.router";
+import { productRouter } from "@/routers/product.router";
 
-export const routers: RouterDefinition[] = [healthRouter];
+export const routers: RouterDefinition[] = [healthRouter, productRouter];

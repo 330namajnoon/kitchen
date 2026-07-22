@@ -53,6 +53,9 @@ La librería es JS puro, sin `.d.ts`. Se le creó un tipado ambiental en [src/ty
 - `createController(action)` → devuelve `action` tal cual (es solo un wrapper identidad), se puede usar directo como handler de Express.
 - `createStorage(fileDirection)` → instancia de `multer` para subida de ficheros.
 - `SocketIo` / `createSocketController` — soporte de sockets, no usado todavía en este proyecto.
+- El `Server` monta `cors()` sin restricciones (`this.app.use(cors())`) antes de los routers, así
+  que cualquier origen puede llamar a la API — el frontend (Vite, otro puerto) no necesita config
+  extra ni proxy para consumirla en local.
 
 **Decisión de diseño**: la librería también permite registrar rutas sueltas vía el array `controllers` del `Server` (formato `{method, path, storage, callback}`, donde `storage` se pasa siempre como middleware posicional aunque no haya upload — si no es una función, Express revienta). Para evitar esa fragilidad, en este proyecto **no se usa ese mecanismo**: todo pasa por `routers` + Express Router estándar. Si en el futuro hace falta subida de ficheros, se monta `createStorage(...).single("file")` como middleware normal dentro del router de esa feature.
 
@@ -148,6 +151,28 @@ Flujo de trabajo: modificar `schema.prisma` → `yarn db:migrate` (te pide nombr
 Modelos actuales:
 - `User` (tabla `users`): `id` (int autoincrement, PK), `username` (varchar(100), unique), `password` (varchar(255) — MySQL/MariaDB no tiene un tipo nativo "password", se guarda el hash como varchar).
 
+## Recursos actuales
+
+### `products` — `GET /products/:barcode`
+
+[src/services/product.service.ts](src/services/product.service.ts) → [src/controllers/product.controller.ts](src/controllers/product.controller.ts) → [src/routers/product.router.ts](src/routers/product.router.ts).
+
+- No hay tabla de productos en la base de datos propia: el backend actúa de proxy/normalizador
+  delante de la API pública de **Open Food Facts** (`https://world.openfoodfacts.net/api/v3.6/product/:barcode.json`).
+- `getProductByBarcode` hace el `fetch` y lanza `ProductLookupError(status, message)` si Open
+  Food Facts responde con error — el controller la captura y reenvía el mismo `status` con
+  `{ error }`; cualquier otro fallo (red, JSON inválido) cae a un 502 genérico.
+- El controller reproyecta el `product` crudo de Open Food Facts a un objeto propio con prefijo
+  `product*` (`productName`, `productImage`, `productNutriscore`, `productNutriments`, etc.) —
+  es la forma de desacoplar el contrato de la API pública del que consume el frontend. Al añadir
+  un campo nuevo de Open Food Facts hay que: 1) añadirlo a la interfaz `Product` en
+  `product.service.ts`, 2) mapearlo en `getProduct` (`product.controller.ts`).
+- Todavía no existe ningún endpoint de escritura (crear/guardar producto en una nevera) — el
+  frontend solo consulta este `GET` de lectura; ver el `CLAUDE.md` del frontend para el estado de
+  la pantalla que lo consume (`AddProduct`).
+
 ## Frontend
 
-El proyecto hermano `../frontend` (antes `public`) es Vite + React + TS, independiente de este backend.
+El proyecto hermano `../frontend` (antes `public`) es Vite + React + TS, independiente de este
+backend, y lo consume vía RTK Query apuntando a `VITE_API_URL` (por defecto
+`http://localhost:4001`, debe coincidir con el `PORT` de aquí).

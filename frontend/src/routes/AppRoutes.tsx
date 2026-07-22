@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { MainLayout } from '@/layouts/MainLayout'
+import { AddProduct } from '@/pages/AddProduct'
 import { Fridge } from '@/pages/Fridge'
 import { Home } from '@/pages/Home'
 import { Login } from '@/pages/Login'
@@ -13,6 +14,7 @@ export const AppRoutes = () => {
         <Route path={paths.home} element={<Home />} />
         <Route path={paths.login} element={<Login />} />
         <Route path={paths.fridge} element={<Fridge />} />
+        <Route path={paths.addProduct} element={<AddProduct />} />
       </Route>
       <Route path={paths.scanBarcode} element={<ScanBarcode />} />
     </Routes>

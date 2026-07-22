@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BarcodeDetector } from 'barcode-detector/ponyfill'
 import CloseIcon from '@mui/icons-material/Close'
 import CircularProgress from '@mui/material/CircularProgress'
-import { paths } from '@/routes/paths'
+import { buildAddProductPath, paths } from '@/routes/paths'
 import { CloseButton, HintText, ScannerWrapper, StatusOverlay, Video, Viewfinder } from './ScanBarcode.styles'
 
 type PermissionState = 'requesting' | 'granted' | 'denied'
@@ -35,7 +35,7 @@ export const ScanBarcode = () => {
             if (codes.length > 0) {
               cancelled = true
               streamRef.current?.getTracks().forEach((track) => track.stop())
-              window.alert(`Código detectado: ${codes[0].rawValue}`)
+              navigate(buildAddProductPath(codes[0].rawValue))
               return
             }
           })
@@ -68,7 +68,7 @@ export const ScanBarcode = () => {
       cancelAnimationFrame(frameId)
       streamRef.current?.getTracks().forEach((track) => track.stop())
     }
-  }, [])
+  }, [navigate])
 
   return (
     <ScannerWrapper>

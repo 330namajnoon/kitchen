@@ -62,13 +62,37 @@ Para añadir una página nueva:
    [src/routes/AppRoutes.tsx](src/routes/AppRoutes.tsx).
 3. Si necesita link en el nav, añadirlo en [src/layouts/MainLayout.tsx](src/layouts/MainLayout.tsx).
 
+## Llamadas a la API (RTK Query)
+
+- [src/services/api.ts](src/services/api.ts) define el `api` base: un único `createApi` con
+  `reducerPath: 'api'` y `fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_URL })`, con
+  `endpoints: () => ({})` vacío.
+- Cada dominio (productos, etc.) crea su propio `src/services/<dominio>Api.ts` que **inyecta**
+  sus endpoints en ese `api` con `api.injectEndpoints({...})`, en vez de llamar a `createApi` de
+  nuevo. Así todos comparten baseUrl, headers y `tagTypes` sin duplicar configuración. Ejemplo:
+  [src/services/productsApi.ts](src/services/productsApi.ts).
+- El store solo registra el `api` base (`api.reducerPath` / `api.middleware`) en
+  [src/store/index.ts](src/store/index.ts) — los slices inyectados no necesitan tocar el store.
+- URL del backend en `VITE_API_URL` (`.env`, por defecto `http://localhost:4001`).
+
+Para añadir un endpoint nuevo:
+1. Si el dominio ya tiene `services/<dominio>Api.ts`, añadir el endpoint ahí dentro de
+   `injectEndpoints`. Si es un dominio nuevo, crear el archivo siguiendo el ejemplo de
+   `productsApi.ts` (importa `api` de `./api`, nunca crea otro `createApi`).
+2. Exportar el hook generado (`useXxxQuery` / `useXxxMutation`) y usarlo directo en el componente.
+
 ## Routing
 
 - Rutas centralizadas en [src/routes/paths.ts](src/routes/paths.ts) (nunca hardcodear strings de
   rutas en componentes, usar `paths.home`, `paths.login`, etc.).
-- [src/routes/AppRoutes.tsx](src/routes/AppRoutes.tsx) define el árbol de `<Routes>`. Todas las
-  páginas actuales cuelgan de `MainLayout` (header + `<Outlet />`).
+- [src/routes/AppRoutes.tsx](src/routes/AppRoutes.tsx) define el árbol de `<Routes>`. La mayoría
+  de páginas cuelgan de `MainLayout` (header + `<Outlet />`); `ScanBarcode` va fuera porque ocupa
+  toda la pantalla (cámara a pantalla completa, sin header).
 - `BrowserRouter` vive en [src/main.tsx](src/main.tsx), a nivel raíz.
+- Rutas con parámetro (ej. `/nevera/anadir/:code`) se declaran en `paths.ts` con el patrón
+  (`:code`) para usar en `<Route path={...}>`, más una función builder (`buildAddProductPath(code)`)
+  que arma la URL real para `navigate(...)`/`<Link>`. Ver `paths.addProduct` /
+  `buildAddProductPath` como ejemplo a seguir para nuevas rutas dinámicas.
 
 ## Estado global (Redux)
 
@@ -141,6 +165,17 @@ yarn preview   # sirve el build de producción localmente
 
 ## Estado actual
 
-- Páginas: `Home` (demo de MUI Button + Redux) y `Login` (formulario MUI con TextFields).
-- Sin autenticación real todavía — el formulario de Login no llama a ningún servicio.
+- Páginas:
+  - `Home` — demo de MUI Button + Redux.
+  - `Login` — formulario MUI con TextFields, sin autenticación real (no llama a ningún servicio).
+  - `Fridge` (`/nevera`) — grid de productos, hoy con datos mock (`src/constants/mockProducts.ts`),
+    y un `SpeedDial` para añadir producto a mano o escaneando código de barras.
+  - `ScanBarcode` (`/nevera/escanear`) — abre la cámara y usa `barcode-detector` para leer el
+    código; al detectarlo navega a `AddProduct` con `buildAddProductPath(code)`.
+  - `AddProduct` (`/nevera/anadir/:code`) — llama a `GET /products/:code` del backend
+    (`useGetProductByCodeQuery`, vía `productsApi`) y pinta los datos de Open Food Facts
+    (nombre, foto, marca, Nutri-Score/Eco-Score/Nova, alérgenos) junto a un formulario con los
+    campos que Open Food Facts no provee y hay que rellenar a mano (descripción, categoría,
+    fecha de caducidad, cantidad restante %, comentario). El submit todavía no persiste nada —
+    no existe endpoint de escritura en el backend; solo redirige a `Fridge`.
 - Sin dark mode configurado (solo `mode: 'light'` en el tema de MUI).

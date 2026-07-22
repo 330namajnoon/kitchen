@@ -1,14 +1,17 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import EditNoteIcon from '@mui/icons-material/EditNote'
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import SpeedDial from '@mui/material/SpeedDial'
 import SpeedDialAction from '@mui/material/SpeedDialAction'
 import { mockProducts } from '@/constants/mockProducts'
+import { paths } from '@/routes/paths'
 import { FridgeWrapper, PageTitle, ProductCard, ProductGrid, ProductName, ProductPhoto } from './Fridge.styles'
 import { Add } from '@mui/icons-material'
 
 export const Fridge = () => {
+  const navigate = useNavigate()
   const [addMenuOpen, setAddMenuOpen] = useState(false)
 
   return (
@@ -46,7 +49,10 @@ export const Fridge = () => {
               tooltip: { title: 'Escanear código de barras', open: true },
               staticTooltipLabel: { sx: { whiteSpace: 'nowrap' } },
             }}
-            onClick={() => setAddMenuOpen(false)}
+            onClick={() => {
+              setAddMenuOpen(false)
+              navigate(paths.scanBarcode)
+            }}
           />
         </SpeedDial>
       </ClickAwayListener>

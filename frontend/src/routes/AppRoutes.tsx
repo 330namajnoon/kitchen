@@ -3,6 +3,7 @@ import { MainLayout } from '@/layouts/MainLayout'
 import { Fridge } from '@/pages/Fridge'
 import { Home } from '@/pages/Home'
 import { Login } from '@/pages/Login'
+import { ScanBarcode } from '@/pages/ScanBarcode'
 import { paths } from './paths'
 
 export const AppRoutes = () => {
@@ -13,6 +14,7 @@ export const AppRoutes = () => {
         <Route path={paths.login} element={<Login />} />
         <Route path={paths.fridge} element={<Fridge />} />
       </Route>
+      <Route path={paths.scanBarcode} element={<ScanBarcode />} />
     </Routes>
   )
 }

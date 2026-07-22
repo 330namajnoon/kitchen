@@ -1,0 +1,48 @@
+module.exports = {
+  apps: [
+    {
+      name: "kitchen-backend",
+      script: "dist/index.js",
+      cwd: __dirname,
+      instances: 1,
+      exec_mode: "fork",
+      watch: false,
+      autorestart: true,
+      max_memory_restart: "300M",
+      env: {
+        NODE_ENV: "development",
+        PORT: 4001,
+        STATIC_DIR: "./public",
+      },
+      env_production: {
+        NODE_ENV: "production",
+        PORT: 4001,
+        STATIC_DIR: "./public",
+      },
+      out_file: "./logs/out.log",
+      error_file: "./logs/error.log",
+      merge_logs: true,
+      time: true,
+    },
+    {
+      name: "kitchen-backend-dev",
+      script: "src/index.ts",
+      interpreter: "node_modules/.bin/tsx",
+      cwd: __dirname,
+      instances: 1,
+      exec_mode: "fork",
+      watch: ["src"],
+      ignore_watch: ["node_modules", "dist", "logs", "public"],
+      autorestart: true,
+      env: {
+        NODE_ENV: "development",
+        PORT: 4001,
+        STATIC_DIR: "./public",
+      },
+      out_file: "./logs/dev-out.log",
+      error_file: "./logs/dev-error.log",
+      merge_logs: true,
+      time: true,
+    },
+  ],
+};

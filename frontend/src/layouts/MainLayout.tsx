@@ -14,6 +14,9 @@ export const MainLayout = () => {
           <NavLink as={Link} to={paths.login}>
             Login
           </NavLink>
+          <NavLink as={Link} to={paths.fridge}>
+            Nevera
+          </NavLink>
         </Nav>
       </Header>
       <Main>

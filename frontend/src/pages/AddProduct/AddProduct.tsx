@@ -1,5 +1,6 @@
-import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useFormik } from 'formik'
+import * as yup from 'yup'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -29,28 +30,45 @@ const formatTag = (tag: string) => {
   return withoutPrefix.replace(/-/g, ' ')
 }
 
+const validationSchema = yup.object({
+  description: yup.string().trim().required('La descripción es obligatoria'),
+  category: yup.string().trim().required('La categoría es obligatoria'),
+  expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
+  quantityRemaining: yup.number().min(0).max(100).required(),
+  comment: yup.string(),
+})
+
+interface AddProductFormValues {
+  description: string
+  category: string
+  expirationDate: string
+  quantityRemaining: number
+  comment: string
+}
+
 export const AddProduct = () => {
   const { code = '' } = useParams<{ code: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError, error } = useGetProductByCodeQuery(code, { skip: !code })
 
-  // Campos que el usuario tiene que rellenar a mano: Open Food Facts no los provee.
-  // `undefined` significa "aún no tocado por el usuario", así que se muestra el valor
-  // sugerido a partir de los datos de Open Food Facts sin necesitar un efecto.
-  const [description, setDescription] = useState<string>()
-  const [quantityRemaining, setQuantityRemaining] = useState(100)
-  const [expirationDate, setExpirationDate] = useState('')
-  const [category, setCategory] = useState<string>()
-  const [comment, setComment] = useState('')
-
   const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
   const suggestedCategory = data?.productCategories?.[0] ? formatTag(data.productCategories[0]) : ''
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    // TODO: no existe todavía un endpoint para persistir el producto en la nevera.
-    navigate(paths.fridge)
-  }
+  const formik = useFormik<AddProductFormValues>({
+    enableReinitialize: true,
+    initialValues: {
+      description: suggestedDescription,
+      category: suggestedCategory,
+      expirationDate: '',
+      quantityRemaining: 100,
+      comment: '',
+    },
+    validationSchema,
+    onSubmit: () => {
+      // TODO: no existe todavía un endpoint para persistir el producto en la nevera.
+      navigate(paths.fridge)
+    },
+  })
 
   if (!code) {
     return (
@@ -125,28 +143,40 @@ export const AddProduct = () => {
 
       <SectionTitle>Datos de la nevera</SectionTitle>
 
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={formik.handleSubmit}>
         <TextField
+          name="description"
           label="Descripción"
-          value={description ?? suggestedDescription}
-          onChange={(event) => setDescription(event.target.value)}
+          value={formik.values.description}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.description && Boolean(formik.errors.description)}
+          helperText={formik.touched.description && formik.errors.description}
           multiline
           minRows={2}
           fullWidth
         />
 
         <TextField
+          name="category"
           label="Categoría"
-          value={category ?? suggestedCategory}
-          onChange={(event) => setCategory(event.target.value)}
+          value={formik.values.category}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.category && Boolean(formik.errors.category)}
+          helperText={formik.touched.category && formik.errors.category}
           fullWidth
         />
 
         <TextField
+          name="expirationDate"
           label="Fecha de caducidad"
           type="date"
-          value={expirationDate}
-          onChange={(event) => setExpirationDate(event.target.value)}
+          value={formik.values.expirationDate}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.expirationDate && Boolean(formik.errors.expirationDate)}
+          helperText={formik.touched.expirationDate && formik.errors.expirationDate}
           slotProps={{ inputLabel: { shrink: true } }}
           fullWidth
         />
@@ -154,11 +184,11 @@ export const AddProduct = () => {
         <SliderRow>
           <SliderLabel>
             <span>Cantidad restante</span>
-            <span>{quantityRemaining}%</span>
+            <span>{formik.values.quantityRemaining}%</span>
           </SliderLabel>
           <Slider
-            value={quantityRemaining}
-            onChange={(_event, value) => setQuantityRemaining(value as number)}
+            value={formik.values.quantityRemaining}
+            onChange={(_event, value) => formik.setFieldValue('quantityRemaining', value)}
             min={0}
             max={100}
             step={5}
@@ -166,9 +196,11 @@ export const AddProduct = () => {
         </SliderRow>
 
         <TextField
+          name="comment"
           label="Comentario (opcional)"
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
+          value={formik.values.comment}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           multiline
           minRows={2}
           fullWidth

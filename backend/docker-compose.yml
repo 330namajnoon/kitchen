@@ -1,0 +1,22 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: kitchen-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-kitchen}
+      MARIADB_USER: ${MARIADB_USER:-kitchen}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-kitchen}
+    ports:
+      - "${MARIADB_PORT:-3306}:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mariadb-data:

@@ -15,7 +15,7 @@ Backend Express montado sobre la librería propia **`sm-express-server`**, escri
 
 ```
 src/
-  config/env.ts          # PORT, NODE_ENV, STATIC_DIR (via dotenv/config)
+  config/env.ts          # PORT, NODE_ENV, STATIC_DIR, MARIADB_* (via dotenv/config)
   controllers/            # handlers, envueltos con createController()
   routers/                # createRouter() por feature + index.router.ts que los agrega
   services/               # lógica de negocio, separada del controller
@@ -27,6 +27,10 @@ public/                   # carpeta estática que sirve el Server (2º arg del c
 dist/                     # build compilado (gitignored)
 logs/                     # logs de pm2 (gitignored)
 ecosystem.config.js       # config de pm2
+docker-compose.yml        # servidor MariaDB local
+prisma/schema.prisma      # esquema de la base de datos (fuente de verdad)
+prisma/migrations/        # migraciones versionadas, generadas por Prisma
+prisma.config.ts          # config de Prisma (lee DATABASE_URL)
 tsconfig.json
 .env.example
 ```
@@ -60,9 +64,18 @@ Definidas en [.env.example](.env.example) (copiar a `.env` para local sin pm2):
 PORT=4001
 NODE_ENV=development
 STATIC_DIR=./public
+
+# MariaDB (docker-compose.yml)
+MARIADB_PORT=3306
+MARIADB_DATABASE=kitchen
+MARIADB_USER=kitchen
+MARIADB_PASSWORD=kitchen
+MARIADB_ROOT_PASSWORD=root
 ```
 
-`src/config/env.ts` las lee con fallback. Nota: `PORT=4001` porque el 4000 ya lo ocupa otra app del usuario corriendo en pm2 (`asystent`, ver `pm2 list`).
+`src/config/env.ts` las lee con fallback (expuestas bajo `env.mariadb.*`). Nota: `PORT=4001` porque el 4000 ya lo ocupa otra app del usuario corriendo en pm2 (`asystent`, ver `pm2 list`).
+
+Las mismas variables `MARIADB_*` están replicadas en los bloques `env` / `env_production` de `ecosystem.config.js` (pm2 no lee `.env` automáticamente, hay que declararlas ahí para que los procesos gestionados por pm2 las tengan).
 
 ## pm2 (`ecosystem.config.js`)
 
@@ -99,6 +112,41 @@ yarn pm2:logs         # pm2 logs kitchen-backend
 Para ver logs del modo dev: `pm2 logs kitchen-backend-dev`.
 
 Tras arrancar/parar procesos con pm2 conviene `pm2 save` para que el dump persista (útil si el usuario tiene `pm2 resurrect`/startup configurado).
+
+## Base de datos (MariaDB vía Docker)
+
+`docker-compose.yml` levanta un contenedor `mariadb:11` (`kitchen-mariadb`) con volumen persistente `mariadb-data`. Se eligió MariaDB sobre MySQL por ser 100% open-source (sin la licencia de Oracle), compatible con el protocolo/driver de MySQL y más ligera.
+
+Credenciales por defecto (ver [Variables de entorno](#variables-de-entorno)): db `kitchen`, user/pass `kitchen`/`kitchen`, puerto `3306`.
+
+```
+docker compose up -d       # arrancar
+docker compose down        # parar (mantiene datos)
+docker compose down -v     # parar y borrar datos (¡destructivo!)
+docker compose logs -f     # ver logs
+```
+
+Conexión manual: `mysql -h 127.0.0.1 -P 3306 -u kitchen -pkitchen kitchen`.
+
+El usuario `kitchen` tiene `GRANT ALL PRIVILEGES ON *.*` (no solo sobre la db `kitchen`) porque Prisma Migrate necesita crear una shadow database temporal para detectar drift entre `schema.prisma` y la base real — sin ese permiso global, `prisma migrate dev` falla con `P3014`.
+
+## ORM y migraciones (Prisma)
+
+El esquema de la base de datos vive como código en [prisma/schema.prisma](prisma/schema.prisma) — es la fuente de verdad, no se edita la base a mano. `prisma.config.ts` lee `DATABASE_URL` (declarada en `.env` / `.env.example` / `ecosystem.config.js`, debe apuntar al mismo servidor que las variables `MARIADB_*`).
+
+Generator configurado con `output = "../src/generated/prisma"` (gitignored, se regenera con `prisma generate` — ya se ejecuta automáticamente tras `migrate dev`/`migrate deploy`).
+
+```
+yarn db:migrate          # prisma migrate dev — crea+aplica una migración a partir de los cambios en schema.prisma (uso local)
+yarn db:migrate:deploy   # prisma migrate deploy — aplica migraciones ya existentes sin generar nuevas (uso en servidores/CI)
+yarn db:generate         # regenera el cliente TS sin tocar la base
+yarn db:studio           # prisma studio — UI para inspeccionar/editar datos
+```
+
+Flujo de trabajo: modificar `schema.prisma` → `yarn db:migrate` (te pide nombre si no lo pasas con `--name`) → queda un archivo nuevo en `prisma/migrations/<timestamp>_<nombre>/migration.sql` que sí se versiona en git. Para apuntar a un servidor de base de datos nuevo (otra máquina, staging, etc.): solo hay que cambiar `DATABASE_URL` y correr `yarn db:migrate:deploy` — no hace falta tocar el esquema.
+
+Modelos actuales:
+- `User` (tabla `users`): `id` (int autoincrement, PK), `username` (varchar(100), unique), `password` (varchar(255) — MySQL/MariaDB no tiene un tipo nativo "password", se guarda el hash como varchar).
 
 ## Frontend
 

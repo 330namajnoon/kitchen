@@ -20,6 +20,9 @@ export const MainLayout = () => {
           <NavLink as={Link} to={paths.genericProducts}>
             Productos genéricos
           </NavLink>
+          <NavLink as={Link} to={paths.recipes}>
+            Recetas
+          </NavLink>
         </Nav>
       </Header>
       <Main>

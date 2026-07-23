@@ -53,7 +53,34 @@ model GenericProduct {
   description String?  @db.VarChar(500)
   createdAt   DateTime @default(now())
 
-  fridgeProducts FridgeProduct[]
+  fridgeProducts    FridgeProduct[]
+  recipeIngredients RecipeIngredient[]
 
   @@map("generic_products")
+}
+
+model Recipe {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String   @db.VarChar(1000)
+  photoUrl    String?  @db.VarChar(500)
+  createdAt   DateTime @default(now())
+
+  ingredients RecipeIngredient[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id             Int          @id @default(autoincrement())
+  quantityAmount Float
+  quantityUnit   QuantityUnit
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  genericProductId Int
+  genericProduct   GenericProduct @relation(fields: [genericProductId], references: [id])
+
+  @@map("recipe_ingredients")
 }

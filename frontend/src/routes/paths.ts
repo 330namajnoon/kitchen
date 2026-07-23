@@ -8,8 +8,12 @@ export const paths = {
   genericProducts: '/productos-genericos',
   addGenericProduct: '/productos-genericos/anadir',
   editGenericProduct: '/productos-genericos/:id/editar',
+  recipes: '/recetas',
+  addRecipe: '/recetas/anadir',
+  editRecipe: '/recetas/:id/editar',
 } as const
 
 export const buildAddProductPath = (code: string) => `/nevera/anadir/${code}`
 export const buildEditProductPath = (id: number) => `/nevera/${id}/editar`
 export const buildEditGenericProductPath = (id: number) => `/productos-genericos/${id}/editar`
+export const buildEditRecipePath = (id: number) => `/recetas/${id}/editar`

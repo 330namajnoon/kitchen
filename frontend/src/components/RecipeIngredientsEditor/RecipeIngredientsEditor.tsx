@@ -10,6 +10,38 @@ import type { QuantityUnit } from '@/types/product'
 import type { RecipeIngredientInput } from '@/types/recipe'
 import { EditorWrapper, EmptyState, IngredientList, IngredientName, IngredientRow, SelectorRow } from './RecipeIngredientsEditor.styles'
 
+interface QuantityAmountInputProps {
+  quantityAmount: number
+  onChange: (quantityAmount: number) => void
+}
+
+const QuantityAmountInput = ({ quantityAmount, onChange }: QuantityAmountInputProps) => {
+  const [text, setText] = useState(String(quantityAmount))
+
+  return (
+    <TextField
+      type="number"
+      size="small"
+      label="Cantidad"
+      value={text}
+      onChange={(event) => {
+        const value = event.target.value
+        setText(value)
+        if (value !== '') onChange(Number(value))
+      }}
+      onBlur={() => {
+        if (text === '') {
+          setText(String(quantityAmount))
+          return
+        }
+        setText(String(Number(text)))
+      }}
+      onFocus={(event) => event.target.select()}
+      slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+    />
+  )
+}
+
 interface RecipeIngredientsEditorProps {
   ingredients: RecipeIngredientInput[]
   genericProducts: GenericProduct[]
@@ -39,7 +71,7 @@ export const RecipeIngredientsEditor = ({
 
   const handleAdd = (product: GenericProduct | null) => {
     if (!product) return
-    onChange([...ingredients, { genericProductId: product.id, quantityAmount: 0, quantityUnit: 'g' }])
+    onChange([...ingredients, { genericProductId: product.id, quantityAmount: 1, quantityUnit: 'g' }])
     setInputValue('')
   }
 
@@ -75,13 +107,9 @@ export const RecipeIngredientsEditor = ({
             return (
               <IngredientRow key={ingredient.genericProductId}>
                 <IngredientName>{product?.name ?? 'Producto desconocido'}</IngredientName>
-                <TextField
-                  type="number"
-                  size="small"
-                  label="Cantidad"
-                  value={ingredient.quantityAmount}
-                  onChange={(event) => updateIngredient(ingredient.genericProductId, { quantityAmount: Number(event.target.value) })}
-                  slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+                <QuantityAmountInput
+                  quantityAmount={ingredient.quantityAmount}
+                  onChange={(quantityAmount) => updateIngredient(ingredient.genericProductId, { quantityAmount })}
                 />
                 <TextField
                   select

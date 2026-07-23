@@ -35,6 +35,13 @@ export const ProductHeader = styled.div`
   }
 `
 
+export const PhotoWrapper = styled.div`
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+`
+
 export const ProductPhoto = styled.img`
   width: 140px;
   height: 140px;
@@ -52,6 +59,24 @@ export const ProductPhotoPlaceholder = styled.div`
   background-color: ${({ theme }) => theme.colors.neutral[100]};
   border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
   flex-shrink: 0;
+`
+
+export const PhotoEditButton = styled.button`
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid ${({ theme }) => theme.colors.background.default};
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.colors.primary.main};
+  color: ${({ theme }) => theme.colors.primary.contrastText};
+  cursor: pointer;
+  appearance: none;
 `
 
 export const ProductInfo = styled.div`

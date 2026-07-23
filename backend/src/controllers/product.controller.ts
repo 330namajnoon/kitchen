@@ -121,6 +121,17 @@ export const editProduct = createController(async (req, res) => {
   }
 });
 
+export const uploadProductPhoto = createController(async (req, res) => {
+  const file = req.file;
+
+  if (!file) {
+    res.status(400).json({ error: "No se ha subido ninguna imagen" });
+    return;
+  }
+
+  res.status(201).json({ url: `/uploads/products/${file.filename}` });
+});
+
 export const removeProduct = createController(async (req, res) => {
   const id = Number(req.params.id);
 

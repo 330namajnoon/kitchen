@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import type { ChangeEvent } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import Add from '@mui/icons-material/Add'
+import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -10,7 +12,12 @@ import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
-import { useDeleteProductMutation, useGetProductsQuery, useUpdateProductMutation } from '@/services/productsApi'
+import {
+  useDeleteProductMutation,
+  useGetProductsQuery,
+  useUpdateProductMutation,
+  useUploadProductPhotoMutation,
+} from '@/services/productsApi'
 import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
 import type { Product, QuantityUnit } from '@/types/product'
@@ -21,6 +28,8 @@ import {
   EditProductWrapper,
   Form,
   GenericProductRow,
+  PhotoEditButton,
+  PhotoWrapper,
   ProductHeader,
   ProductInfo,
   ProductName,
@@ -35,6 +44,8 @@ import {
 const DRAFT_STORAGE_KEY = 'kitchen:editProductDraft'
 
 const validationSchema = yup.object({
+  name: yup.string().trim().required('El nombre es obligatorio'),
+  photoUrl: yup.string(),
   description: yup.string().trim().required('La descripción es obligatoria'),
   category: yup.string().trim().required('La categoría es obligatoria'),
   expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
@@ -51,6 +62,8 @@ const validationSchema = yup.object({
 })
 
 interface EditProductFormValues {
+  name: string
+  photoUrl: string
   description: string
   category: string
   expirationDate: string
@@ -74,7 +87,9 @@ export const EditProduct = () => {
   const { data: products, isLoading, isError } = useGetProductsQuery(undefined, { skip: Boolean(productFromState) })
   const [updateProduct, { isLoading: isSaving }] = useUpdateProductMutation()
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation()
+  const [uploadProductPhoto, { isLoading: isUploadingPhoto }] = useUploadProductPhotoMutation()
   const { data: genericProducts } = useGetGenericProductsQuery()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const product = productFromState ?? products?.find((item) => item.id === productId)
   const suggestedGenericProduct =
@@ -85,6 +100,8 @@ export const EditProduct = () => {
   const formik = useFormik<EditProductFormValues>({
     enableReinitialize: true,
     initialValues: {
+      name: product?.name ?? '',
+      photoUrl: product?.photoUrl ?? '',
       description: product?.description ?? '',
       category: product?.category ?? '',
       expirationDate: product ? toDateInputValue(product.expirationDate) : '',
@@ -100,6 +117,8 @@ export const EditProduct = () => {
       try {
         await updateProduct({
           id: productId,
+          name: values.name,
+          photoUrl: values.photoUrl || undefined,
           description: values.description,
           category: values.category,
           expirationDate: values.expirationDate,
@@ -146,6 +165,19 @@ export const EditProduct = () => {
   const handleCreateGenericProduct = () => {
     sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formik.values))
     navigate(paths.addGenericProduct, { state: { returnTo: location.pathname, returnState: { product } } })
+  }
+
+  const handlePhotoInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      const { url } = await uploadProductPhoto(file).unwrap()
+      formik.setFieldValue('photoUrl', url)
+    } catch {
+      // el error se muestra debajo del formulario
+    }
   }
 
   const handleDelete = async () => {
@@ -195,12 +227,24 @@ export const EditProduct = () => {
     )
   }
 
-  const displayName = product.name || product.description
+  const displayName = formik.values.name || product.description
+  const displayPhotoUrl = formik.values.photoUrl
 
   return (
     <EditProductWrapper>
       <ProductHeader>
-        {product.photoUrl ? <ProductPhoto src={product.photoUrl} alt={displayName} /> : <ProductPhotoPlaceholder />}
+        <PhotoWrapper>
+          {displayPhotoUrl ? <ProductPhoto src={displayPhotoUrl} alt={displayName} /> : <ProductPhotoPlaceholder />}
+          <PhotoEditButton
+            type="button"
+            aria-label="Cambiar foto del producto"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingPhoto}
+          >
+            {isUploadingPhoto ? <CircularProgress size={18} color="inherit" /> : <PhotoCamera fontSize="small" />}
+          </PhotoEditButton>
+          <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePhotoInputChange} />
+        </PhotoWrapper>
 
         <ProductInfo>
           <ProductName>{displayName}</ProductName>
@@ -232,6 +276,17 @@ export const EditProduct = () => {
             <Add />
           </IconButton>
         </GenericProductRow>
+
+        <TextField
+          name="name"
+          label="Nombre"
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.name && Boolean(formik.errors.name)}
+          helperText={formik.touched.name && formik.errors.name}
+          fullWidth
+        />
 
         <TextField
           name="description"

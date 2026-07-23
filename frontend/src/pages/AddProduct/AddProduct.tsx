@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import type { ChangeEvent } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import Add from '@mui/icons-material/Add'
+import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -12,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
 import { useGetProductByCodeQuery } from '@/services/productLookupApi'
-import { useAddProductMutation } from '@/services/productsApi'
+import { useAddProductMutation, useUploadProductPhotoMutation } from '@/services/productsApi'
 import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
 import type { ProductLookupResponse, QuantityUnit } from '@/types/product'
@@ -23,6 +25,8 @@ import {
   ChipsRow,
   Form,
   GenericProductRow,
+  PhotoEditButton,
+  PhotoWrapper,
   ProductBrand,
   ProductHeader,
   ProductInfo,
@@ -60,6 +64,8 @@ const parseOffQuantity = (quantity: string): { amount: number; unit: QuantityUni
 }
 
 const validationSchema = yup.object({
+  name: yup.string().trim().required('El nombre es obligatorio'),
+  photoUrl: yup.string(),
   description: yup.string().trim().required('La descripción es obligatoria'),
   category: yup.string().trim().required('La categoría es obligatoria'),
   expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
@@ -76,6 +82,8 @@ const validationSchema = yup.object({
 })
 
 interface AddProductFormValues {
+  name: string
+  photoUrl: string
   description: string
   category: string
   expirationDate: string
@@ -111,7 +119,9 @@ export const AddProduct = () => {
   } = useGetProductByCodeQuery(code, { skip: !code || Boolean(detectedProduct) })
   const data = detectedProduct ?? lookupData
   const [addProduct, { isLoading: isSaving }] = useAddProductMutation()
+  const [uploadProductPhoto, { isLoading: isUploadingPhoto }] = useUploadProductPhotoMutation()
   const { data: genericProducts } = useGetGenericProductsQuery()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
   const suggestedCategory = data?.productCategories?.[0] ? formatTag(data.productCategories[0]) : ''
@@ -124,6 +134,8 @@ export const AddProduct = () => {
   const formik = useFormik<AddProductFormValues>({
     enableReinitialize: true,
     initialValues: {
+      name: data?.productName ?? data?.productGenericNameEs ?? data?.productGenericName ?? '',
+      photoUrl: data?.productImageFrontUrl ?? data?.productImage ?? '',
       description: suggestedDescription,
       category: suggestedCategory,
       expirationDate: '',
@@ -139,8 +151,8 @@ export const AddProduct = () => {
       try {
         await addProduct({
           barcode: code,
-          name: data?.productName,
-          photoUrl: data?.productImageFrontUrl ?? data?.productImage,
+          name: values.name,
+          photoUrl: values.photoUrl || undefined,
           description: values.description,
           category: values.category,
           expirationDate: values.expirationDate,
@@ -190,6 +202,19 @@ export const AddProduct = () => {
     navigate(paths.addGenericProduct, { state: { returnTo: location.pathname } })
   }
 
+  const handlePhotoInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      const { url } = await uploadProductPhoto(file).unwrap()
+      formik.setFieldValue('photoUrl', url)
+    } catch {
+      // el error se muestra debajo del formulario
+    }
+  }
+
   if (!code) {
     return (
       <AddProductWrapper>
@@ -232,13 +257,24 @@ export const AddProduct = () => {
     )
   }
 
-  const photoUrl = data.productImageFrontUrl ?? data.productImage
-  const displayName = data.productName || data.productGenericNameEs || data.productGenericName || 'Producto sin nombre'
+  const displayName = formik.values.name || 'Producto sin nombre'
+  const displayPhotoUrl = formik.values.photoUrl
 
   return (
     <AddProductWrapper>
       <ProductHeader>
-        {photoUrl ? <ProductPhoto src={photoUrl} alt={displayName} /> : <ProductPhotoPlaceholder />}
+        <PhotoWrapper>
+          {displayPhotoUrl ? <ProductPhoto src={displayPhotoUrl} alt={displayName} /> : <ProductPhotoPlaceholder />}
+          <PhotoEditButton
+            type="button"
+            aria-label="Cambiar foto del producto"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingPhoto}
+          >
+            {isUploadingPhoto ? <CircularProgress size={18} color="inherit" /> : <PhotoCamera fontSize="small" />}
+          </PhotoEditButton>
+          <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePhotoInputChange} />
+        </PhotoWrapper>
 
         <ProductInfo>
           <ProductName>{displayName}</ProductName>
@@ -286,6 +322,17 @@ export const AddProduct = () => {
             <Add />
           </IconButton>
         </GenericProductRow>
+
+        <TextField
+          name="name"
+          label="Nombre"
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.name && Boolean(formik.errors.name)}
+          helperText={formik.touched.name && formik.errors.name}
+          fullWidth
+        />
 
         <TextField
           name="description"

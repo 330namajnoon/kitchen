@@ -1,5 +1,5 @@
 import type { AddProductRequest, Product, UpdateProductRequest } from '@/types/product'
-import { api } from './api'
+import { API_BASE_URL, api } from './api'
 
 export const productsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -33,6 +33,18 @@ export const productsApi = api.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, id) => [{ type: 'Product', id }, { type: 'Product', id: 'LIST' }],
     }),
+    uploadProductPhoto: builder.mutation<{ url: string }, File>({
+      query: (file) => {
+        const formData = new FormData()
+        formData.append('photo', file)
+        return {
+          url: '/products/photo',
+          method: 'POST',
+          body: formData,
+        }
+      },
+      transformResponse: (response: { url: string }) => ({ url: `${API_BASE_URL}${response.url}` }),
+    }),
   }),
 })
 
@@ -41,4 +53,5 @@ export const {
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useUploadProductPhotoMutation,
 } = productsApi

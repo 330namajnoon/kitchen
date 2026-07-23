@@ -15,7 +15,7 @@ import { useGetProductByCodeQuery } from '@/services/productLookupApi'
 import { useAddProductMutation } from '@/services/productsApi'
 import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
-import type { QuantityUnit } from '@/types/product'
+import type { ProductLookupResponse, QuantityUnit } from '@/types/product'
 import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
 import {
   AddProductWrapper,
@@ -36,6 +36,7 @@ import {
 } from './AddProduct.styles'
 
 const DRAFT_STORAGE_KEY = 'kitchen:addProductDraft'
+const DETECTED_PRODUCT_STORAGE_KEY = 'kitchen:addProductDetected'
 
 /** Convierte un tag de Open Food Facts (ej. "en:whole-milk") en texto legible. */
 const formatTag = (tag: string) => {
@@ -90,7 +91,25 @@ export const AddProduct = () => {
   const { code = '' } = useParams<{ code: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { data, isLoading, isError, error } = useGetProductByCodeQuery(code, { skip: !code })
+  // Los datos detectados por IA llegan una vez por location.state (al navegar desde
+  // DetectProduct). Se guardan en sessionStorage bajo el código sintético para no perderlos si
+  // el usuario navega a "crear producto genérico" y vuelve, lo que reemplaza location.state.
+  const stateDetectedProduct = (location.state as { detectedProduct?: ProductLookupResponse } | null)?.detectedProduct
+  useEffect(() => {
+    if (stateDetectedProduct && code) {
+      sessionStorage.setItem(`${DETECTED_PRODUCT_STORAGE_KEY}:${code}`, JSON.stringify(stateDetectedProduct))
+    }
+  }, [code, stateDetectedProduct])
+  const storedDetectedProduct = code ? sessionStorage.getItem(`${DETECTED_PRODUCT_STORAGE_KEY}:${code}`) : null
+  const detectedProduct: ProductLookupResponse | undefined =
+    stateDetectedProduct ?? (storedDetectedProduct ? JSON.parse(storedDetectedProduct) : undefined)
+  const {
+    data: lookupData,
+    isLoading,
+    isError,
+    error,
+  } = useGetProductByCodeQuery(code, { skip: !code || Boolean(detectedProduct) })
+  const data = detectedProduct ?? lookupData
   const [addProduct, { isLoading: isSaving }] = useAddProductMutation()
   const { data: genericProducts } = useGetGenericProductsQuery()
 
@@ -133,6 +152,7 @@ export const AddProduct = () => {
           genericProductId: values.genericProductId ?? undefined,
         }).unwrap()
         sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+        if (code) sessionStorage.removeItem(`${DETECTED_PRODUCT_STORAGE_KEY}:${code}`)
         navigate(paths.products)
       } catch {
         // el error se muestra debajo del formulario

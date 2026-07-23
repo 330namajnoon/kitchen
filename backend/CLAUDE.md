@@ -170,6 +170,27 @@ Modelos actuales:
 - Todavía no existe ningún endpoint de escritura para este recurso — es solo lectura, el
   guardado real de productos vive en `products` (ver más abajo).
 
+### `product-detect` — `POST /product-detect` (detección de producto por foto con IA)
+
+[src/services/product-detect.service.ts](src/services/product-detect.service.ts) →
+[src/controllers/product-detect.controller.ts](src/controllers/product-detect.controller.ts) →
+[src/routers/product-detect.router.ts](src/routers/product-detect.router.ts).
+
+- Recibe una foto (`multipart/form-data`, campo `photo`) vía `multer` (mismo patrón que
+  `recipe.router.ts`: `diskStorage` en `public/uploads/products-ai/`, nombre `crypto.randomUUID()`).
+- La foto se manda a **Gemini** (`gemini-2.5-flash`, SDK oficial `@google/genai`) con
+  `responseMimeType: "application/json"` + `responseSchema` para forzar un JSON estructurado.
+  Requiere `GEMINI_API_KEY` en `.env` (clave gratuita en https://aistudio.google.com/apikey; sin
+  ella, `detectProductFromImage` lanza `ProductDetectError` y el endpoint responde 502).
+- La respuesta reusa el mismo contrato `product*` que `GET /product-lookup/:barcode`, pero solo
+  con los campos que una foto puede inferir razonablemente (`productName`, `productBrands`,
+  `productQuantity`, `productGenericName`, `productGenericNameEs`, `productIngredientsTextEs`,
+  `productCategories`) más `productImage`/`productImageFrontUrl` apuntando a la foto subida.
+  Deliberadamente **no** incluye Nutri-Score/Eco-Score/Nova/nutrientes — son puntuaciones
+  calculadas por Open Food Facts, no algo que la IA deba inventar a partir de una imagen.
+- `pm2` no lee `.env` automáticamente: `GEMINI_API_KEY` está replicada en los bloques `env` /
+  `env_production` de `ecosystem.config.js`, igual que las variables `MARIADB_*`.
+
 ### `products` — CRUD de productos (comprados o pendientes de comprar)
 
 [src/services/product.service.ts](src/services/product.service.ts) →

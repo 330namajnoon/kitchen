@@ -3,6 +3,7 @@ export const paths = {
   login: '/login',
   products: '/productos',
   scanBarcode: '/productos/escanear',
+  detectProduct: '/productos/detectar',
   addProduct: '/productos/anadir/:code',
   editProduct: '/productos/:id/editar',
   genericProducts: '/productos-genericos',

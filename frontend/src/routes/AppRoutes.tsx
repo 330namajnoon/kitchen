@@ -3,6 +3,7 @@ import { MainLayout } from '@/layouts/MainLayout'
 import { AddGenericProduct } from '@/pages/AddGenericProduct'
 import { AddProduct } from '@/pages/AddProduct'
 import { AddRecipe } from '@/pages/AddRecipe'
+import { DetectProduct } from '@/pages/DetectProduct'
 import { EditGenericProduct } from '@/pages/EditGenericProduct'
 import { EditProduct } from '@/pages/EditProduct'
 import { EditRecipe } from '@/pages/EditRecipe'
@@ -31,6 +32,7 @@ export const AppRoutes = () => {
         <Route path={paths.editRecipe} element={<EditRecipe />} />
       </Route>
       <Route path={paths.scanBarcode} element={<ScanBarcode />} />
+      <Route path={paths.detectProduct} element={<DetectProduct />} />
     </Routes>
   )
 }

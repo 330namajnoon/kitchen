@@ -19,6 +19,7 @@ module.exports = {
         MARIADB_PASSWORD: "kitchen",
         MARIADB_ROOT_PASSWORD: "root",
         DATABASE_URL: "mysql://kitchen:kitchen@localhost:3306/kitchen",
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
       },
       env_production: {
         NODE_ENV: "production",
@@ -30,6 +31,7 @@ module.exports = {
         MARIADB_PASSWORD: "kitchen",
         MARIADB_ROOT_PASSWORD: "root",
         DATABASE_URL: "mysql://kitchen:kitchen@localhost:3306/kitchen",
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
       },
       out_file: "./logs/out.log",
       error_file: "./logs/error.log",
@@ -56,6 +58,7 @@ module.exports = {
         MARIADB_PASSWORD: "kitchen",
         MARIADB_ROOT_PASSWORD: "root",
         DATABASE_URL: "mysql://kitchen:kitchen@localhost:3306/kitchen",
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
       },
       out_file: "./logs/dev-out.log",
       error_file: "./logs/dev-error.log",

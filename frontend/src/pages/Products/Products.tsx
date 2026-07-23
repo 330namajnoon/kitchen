@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import EditNoteIcon from '@mui/icons-material/EditNote'
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -119,6 +120,17 @@ export const Products = () => {
             onClick={() => {
               setAddMenuOpen(false)
               navigate(paths.scanBarcode)
+            }}
+          />
+          <SpeedDialAction
+            icon={<AutoAwesomeIcon />}
+            slotProps={{
+              tooltip: { title: 'Detectar con IA', open: true },
+              staticTooltipLabel: { sx: { whiteSpace: 'nowrap' } },
+            }}
+            onClick={() => {
+              setAddMenuOpen(false)
+              navigate(paths.detectProduct)
             }}
           />
         </SpeedDial>

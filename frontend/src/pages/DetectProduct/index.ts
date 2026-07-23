@@ -1,0 +1,1 @@
+export { DetectProduct } from './DetectProduct'

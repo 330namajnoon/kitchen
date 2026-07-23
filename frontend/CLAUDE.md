@@ -178,6 +178,13 @@ yarn preview   # sirve el build de producción localmente
     no tener que refetchear.
   - `ScanBarcode` (`/productos/escanear`) — abre la cámara y usa `barcode-detector` para leer el
     código; al detectarlo navega a `AddProduct` con `buildAddProductPath(code)`.
+  - `DetectProduct` (`/productos/detectar`) — misma cámara a pantalla completa que `ScanBarcode`
+    pero sin recuadro de escaneo: un botón de disparo captura un frame del `<video>` a un
+    `<canvas>` oculto, lo convierte a `Blob` JPEG y lo manda a `POST /product-detect`
+    (`useDetectProductMutation`, vía `productDetectApi`), que analiza la foto con Gemini en el
+    backend. Al recibir respuesta navega a `AddProduct` con un código sintético
+    (`buildAddProductPath('ia-' + crypto.randomUUID())`) pasando los datos detectados por
+    `location.state.detectedProduct` en vez de un barcode real.
   - `AddProduct` (`/productos/anadir/:code`) — llama a `GET /product-lookup/:code` del backend
     (`useGetProductByCodeQuery`, vía `productLookupApi`) y pinta los datos de Open Food Facts
     (nombre, foto, marca, Nutri-Score/Eco-Score/Nova, alérgenos) junto a un formulario con los
@@ -187,7 +194,10 @@ yarn preview   # sirve el build de producción localmente
     string libre `productQuantity` de Open Food Facts (ej. "500 g", "1 l") con `parseOffQuantity`
     en `AddProduct.tsx`; si no se puede parsear, el usuario la introduce a mano. Es el total del
     envase, no confundir con la cantidad restante % (slider). El submit llama a
-    `useAddProductMutation` (`POST /products`) y redirige a `Products`.
+    `useAddProductMutation` (`POST /products`) y redirige a `Products`. Si viene de
+    `DetectProduct`, el `:code` es sintético (`ia-<uuid>`) y en vez de llamar al lookup usa
+    `location.state.detectedProduct` (persistido también en `sessionStorage` bajo ese código, por
+    si el usuario navega a "crear producto genérico" y vuelve, lo que reemplaza `location.state`).
   - `EditProduct` (`/productos/:id/editar`) — mismo formulario que `AddProduct` (descripción,
     categoría, fecha de caducidad, cantidad total + unidad g/ml, cantidad restante %, comentario)
     pero para un producto ya guardado: lee el producto de `location.state` si viene de tocar una

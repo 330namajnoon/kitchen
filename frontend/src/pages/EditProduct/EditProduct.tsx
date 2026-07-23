@@ -10,10 +10,10 @@ import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
-import { useDeleteFridgeProductMutation, useGetFridgeProductsQuery, useUpdateFridgeProductMutation } from '@/services/fridgeApi'
+import { useDeleteProductMutation, useGetProductsQuery, useUpdateProductMutation } from '@/services/productsApi'
 import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
-import type { FridgeProduct, QuantityUnit } from '@/types/product'
+import type { Product, QuantityUnit } from '@/types/product'
 import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
 import {
   ButtonsRow,
@@ -69,11 +69,11 @@ export const EditProduct = () => {
   const productId = Number(id)
   const navigate = useNavigate()
   const location = useLocation()
-  const productFromState = (location.state as { product?: FridgeProduct } | null)?.product
+  const productFromState = (location.state as { product?: Product } | null)?.product
 
-  const { data: products, isLoading, isError } = useGetFridgeProductsQuery(undefined, { skip: Boolean(productFromState) })
-  const [updateFridgeProduct, { isLoading: isSaving }] = useUpdateFridgeProductMutation()
-  const [deleteFridgeProduct, { isLoading: isDeleting }] = useDeleteFridgeProductMutation()
+  const { data: products, isLoading, isError } = useGetProductsQuery(undefined, { skip: Boolean(productFromState) })
+  const [updateProduct, { isLoading: isSaving }] = useUpdateProductMutation()
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation()
   const { data: genericProducts } = useGetGenericProductsQuery()
 
   const product = productFromState ?? products?.find((item) => item.id === productId)
@@ -98,7 +98,7 @@ export const EditProduct = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        await updateFridgeProduct({
+        await updateProduct({
           id: productId,
           description: values.description,
           category: values.category,
@@ -111,7 +111,7 @@ export const EditProduct = () => {
           genericProductId: values.genericProductId ?? undefined,
         }).unwrap()
         sessionStorage.removeItem(DRAFT_STORAGE_KEY)
-        navigate(paths.fridge)
+        navigate(paths.products)
       } catch {
         // el error se muestra debajo del formulario
       }
@@ -149,11 +149,11 @@ export const EditProduct = () => {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('¿Seguro que quieres borrar este producto de la nevera?')) return
+    if (!window.confirm('¿Seguro que quieres borrar este producto?')) return
 
     try {
-      await deleteFridgeProduct(productId).unwrap()
-      navigate(paths.fridge)
+      await deleteProduct(productId).unwrap()
+      navigate(paths.products)
     } catch {
       // el error se muestra debajo del formulario
     }
@@ -164,8 +164,8 @@ export const EditProduct = () => {
       <EditProductWrapper>
         <CenteredState>
           <p>Producto no válido.</p>
-          <Button variant="contained" onClick={() => navigate(paths.fridge)}>
-            Volver a la nevera
+          <Button variant="contained" onClick={() => navigate(paths.products)}>
+            Volver a productos
           </Button>
         </CenteredState>
       </EditProductWrapper>
@@ -187,8 +187,8 @@ export const EditProduct = () => {
       <EditProductWrapper>
         <CenteredState>
           <p>No se ha encontrado el producto.</p>
-          <Button variant="contained" onClick={() => navigate(paths.fridge)}>
-            Volver a la nevera
+          <Button variant="contained" onClick={() => navigate(paths.products)}>
+            Volver a productos
           </Button>
         </CenteredState>
       </EditProductWrapper>
@@ -207,7 +207,7 @@ export const EditProduct = () => {
         </ProductInfo>
       </ProductHeader>
 
-      <SectionTitle>Datos de la nevera</SectionTitle>
+      <SectionTitle>Datos del producto</SectionTitle>
 
       <Form onSubmit={formik.handleSubmit}>
         <GenericProductRow>

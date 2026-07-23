@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { media } from '@/styles/breakpoints'
 
-export const FridgeWrapper = styled.div`
+export const ProductsWrapper = styled.div`
   flex: 1;
   position: relative;
   padding: 24px 16px 96px;

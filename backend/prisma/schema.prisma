@@ -26,7 +26,7 @@ enum QuantityUnit {
   u
 }
 
-model FridgeProduct {
+model Product {
   id                Int           @id @default(autoincrement())
   barcode           String        @db.VarChar(64)
   name              String?       @db.VarChar(255)
@@ -44,7 +44,7 @@ model FridgeProduct {
   genericProductId Int?
   genericProduct   GenericProduct? @relation(fields: [genericProductId], references: [id])
 
-  @@map("fridge_products")
+  @@map("products")
 }
 
 model GenericProduct {
@@ -53,7 +53,7 @@ model GenericProduct {
   description String?  @db.VarChar(500)
   createdAt   DateTime @default(now())
 
-  fridgeProducts    FridgeProduct[]
+  products          Product[]
   recipeIngredients RecipeIngredient[]
 
   @@map("generic_products")

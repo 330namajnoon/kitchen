@@ -15,7 +15,7 @@ import type { GenericProduct } from './genericProduct'
 
 export type QuantityUnit = 'g' | 'ml' | 'u'
 
-export interface AddFridgeProductRequest {
+export interface AddProductRequest {
   barcode: string
   name?: string
   photoUrl?: string
@@ -30,17 +30,17 @@ export interface AddFridgeProductRequest {
   genericProductId?: number
 }
 
-export interface FridgeProduct extends AddFridgeProductRequest {
+export interface Product extends AddProductRequest {
   id: number
   createdAt: string
   genericProduct?: GenericProduct
 }
 
-export interface UpdateFridgeProductRequest extends Partial<AddFridgeProductRequest> {
+export interface UpdateProductRequest extends Partial<AddProductRequest> {
   id: number
 }
 
-/** Respuesta de GET /products/:barcode (backend/src/controllers/product.controller.ts) */
+/** Respuesta de GET /product-lookup/:barcode (backend/src/controllers/product-lookup.controller.ts) */
 export interface ProductLookupResponse {
   productName?: string
   productImage?: string

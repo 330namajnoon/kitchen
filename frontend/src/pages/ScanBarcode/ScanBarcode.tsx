@@ -25,7 +25,7 @@ export const ScanBarcode = () => {
   const streamRef = useRef<MediaStream | null>(null)
   const [permission, setPermission] = useState<PermissionState>('requesting')
 
-  const handleClose = useCallback(() => navigate(paths.fridge), [navigate])
+  const handleClose = useCallback(() => navigate(paths.products), [navigate])
 
   useEffect(() => {
     let cancelled = false

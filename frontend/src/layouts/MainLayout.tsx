@@ -14,8 +14,8 @@ export const MainLayout = () => {
           <NavLink as={Link} to={paths.login}>
             Login
           </NavLink>
-          <NavLink as={Link} to={paths.fridge}>
-            Nevera
+          <NavLink as={Link} to={paths.products}>
+            Productos
           </NavLink>
           <NavLink as={Link} to={paths.genericProducts}>
             Productos genéricos

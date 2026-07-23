@@ -153,11 +153,11 @@ Modelos actuales:
 
 ## Recursos actuales
 
-### `products` — `GET /products/:barcode`
+### `product-lookup` — `GET /product-lookup/:barcode`
 
-[src/services/product.service.ts](src/services/product.service.ts) → [src/controllers/product.controller.ts](src/controllers/product.controller.ts) → [src/routers/product.router.ts](src/routers/product.router.ts).
+[src/services/product-lookup.service.ts](src/services/product-lookup.service.ts) → [src/controllers/product-lookup.controller.ts](src/controllers/product-lookup.controller.ts) → [src/routers/product-lookup.router.ts](src/routers/product-lookup.router.ts).
 
-- No hay tabla de productos en la base de datos propia: el backend actúa de proxy/normalizador
+- No hay tabla propia detrás de este recurso: el backend actúa de proxy/normalizador
   delante de la API pública de **Open Food Facts** (`https://world.openfoodfacts.net/api/v3.6/product/:barcode.json`).
 - `getProductByBarcode` hace el `fetch` y lanza `ProductLookupError(status, message)` si Open
   Food Facts responde con error — el controller la captura y reenvía el mismo `status` con
@@ -166,29 +166,29 @@ Modelos actuales:
   `product*` (`productName`, `productImage`, `productNutriscore`, `productNutriments`, etc.) —
   es la forma de desacoplar el contrato de la API pública del que consume el frontend. Al añadir
   un campo nuevo de Open Food Facts hay que: 1) añadirlo a la interfaz `Product` en
-  `product.service.ts`, 2) mapearlo en `getProduct` (`product.controller.ts`).
+  `product-lookup.service.ts`, 2) mapearlo en `getProduct` (`product-lookup.controller.ts`).
 - Todavía no existe ningún endpoint de escritura para este recurso — es solo lectura, el
-  guardado real de productos vive en `fridge-products` (ver más abajo).
+  guardado real de productos vive en `products` (ver más abajo).
 
-### `fridge-products` — CRUD de la nevera
+### `products` — CRUD de productos (comprados o pendientes de comprar)
 
-[src/services/fridge-product.service.ts](src/services/fridge-product.service.ts) →
-[src/controllers/fridge-product.controller.ts](src/controllers/fridge-product.controller.ts) →
-[src/routers/fridge-product.router.ts](src/routers/fridge-product.router.ts).
+[src/services/product.service.ts](src/services/product.service.ts) →
+[src/controllers/product.controller.ts](src/controllers/product.controller.ts) →
+[src/routers/product.router.ts](src/routers/product.router.ts).
 
-- Tabla propia `fridge_products` (modelo `FridgeProduct` en `schema.prisma`): `barcode`, `name`,
+- Tabla propia `products` (modelo `Product` en `schema.prisma`): `barcode`, `name`,
   `photoUrl`, `description`, `category`, `expirationDate` (date), `quantityAmount` (cantidad total
   del envase, nullable por filas anteriores a este campo), `quantityUnit` (enum `g`/`ml`, nullable
   por el mismo motivo), `quantityRemaining` (0-100, % restante — no confundir con `quantityAmount`,
   que es el total del envase, no lo que queda), `comment`, `createdAt`. Sin `updatedAt` y sin
   scoping por usuario (el `id` es la única PK).
-- `GET /fridge-products` — lista completa, ordenada por `createdAt` desc.
-- `POST /fridge-products` — crea uno nuevo. Valida a mano (`barcode`, `description`, `category`,
+- `GET /products` — lista completa, ordenada por `createdAt` desc.
+- `POST /products` — crea uno nuevo. Valida a mano (`barcode`, `description`, `category`,
   `expirationDate`, `quantityRemaining` obligatorios) y responde 400 si falta alguno.
-- `PUT /fridge-products/:id` — actualiza campos parciales del producto (usado por la pantalla
+- `PUT /products/:id` — actualiza campos parciales del producto (usado por la pantalla
   `EditProduct` del frontend). Responde 400 si `:id` no es un entero, 404 si Prisma no encuentra
   la fila (`P2025`).
-- `DELETE /fridge-products/:id` — borra el producto (204 sin body). Mismos 400/404 que el `PUT`.
+- `DELETE /products/:id` — borra el producto (204 sin body). Mismos 400/404 que el `PUT`.
 - Ningún endpoint tiene autenticación ni ownership check — cualquiera con la URL puede editar/borrar
   cualquier fila.
 

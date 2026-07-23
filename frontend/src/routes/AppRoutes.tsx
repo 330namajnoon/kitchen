@@ -6,10 +6,10 @@ import { AddRecipe } from '@/pages/AddRecipe'
 import { EditGenericProduct } from '@/pages/EditGenericProduct'
 import { EditProduct } from '@/pages/EditProduct'
 import { EditRecipe } from '@/pages/EditRecipe'
-import { Fridge } from '@/pages/Fridge'
 import { GenericProducts } from '@/pages/GenericProducts'
 import { Home } from '@/pages/Home'
 import { Login } from '@/pages/Login'
+import { Products } from '@/pages/Products'
 import { Recipes } from '@/pages/Recipes'
 import { ScanBarcode } from '@/pages/ScanBarcode'
 import { paths } from './paths'
@@ -20,7 +20,7 @@ export const AppRoutes = () => {
       <Route element={<MainLayout />}>
         <Route path={paths.home} element={<Home />} />
         <Route path={paths.login} element={<Login />} />
-        <Route path={paths.fridge} element={<Fridge />} />
+        <Route path={paths.products} element={<Products />} />
         <Route path={paths.addProduct} element={<AddProduct />} />
         <Route path={paths.editProduct} element={<EditProduct />} />
         <Route path={paths.genericProducts} element={<GenericProducts />} />

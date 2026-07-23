@@ -70,7 +70,9 @@ Para añadir una página nueva:
 - Cada dominio (productos, etc.) crea su propio `src/services/<dominio>Api.ts` que **inyecta**
   sus endpoints en ese `api` con `api.injectEndpoints({...})`, en vez de llamar a `createApi` de
   nuevo. Así todos comparten baseUrl, headers y `tagTypes` sin duplicar configuración. Ejemplo:
-  [src/services/productsApi.ts](src/services/productsApi.ts).
+  [src/services/productsApi.ts](src/services/productsApi.ts) (CRUD de productos) y
+  [src/services/productLookupApi.ts](src/services/productLookupApi.ts) (búsqueda por código de
+  barras contra Open Food Facts, vía el backend).
 - El store solo registra el `api` base (`api.reducerPath` / `api.middleware`) en
   [src/store/index.ts](src/store/index.ts) — los slices inyectados no necesitan tocar el store.
 - URL del backend en `VITE_API_URL` (`.env`, por defecto `http://localhost:4001`).
@@ -89,7 +91,7 @@ Para añadir un endpoint nuevo:
   de páginas cuelgan de `MainLayout` (header + `<Outlet />`); `ScanBarcode` va fuera porque ocupa
   toda la pantalla (cámara a pantalla completa, sin header).
 - `BrowserRouter` vive en [src/main.tsx](src/main.tsx), a nivel raíz.
-- Rutas con parámetro (ej. `/nevera/anadir/:code`) se declaran en `paths.ts` con el patrón
+- Rutas con parámetro (ej. `/productos/anadir/:code`) se declaran en `paths.ts` con el patrón
   (`:code`) para usar en `<Route path={...}>`, más una función builder (`buildAddProductPath(code)`)
   que arma la URL real para `navigate(...)`/`<Link>`. Ver `paths.addProduct` /
   `buildAddProductPath` como ejemplo a seguir para nuevas rutas dinámicas.
@@ -168,15 +170,16 @@ yarn preview   # sirve el build de producción localmente
 - Páginas:
   - `Home` — demo de MUI Button + Redux.
   - `Login` — formulario MUI con TextFields, sin autenticación real (no llama a ningún servicio).
-  - `Fridge` (`/nevera`) — grid de productos reales (`useGetFridgeProductsQuery`, vía
-    `fridgeApi`), con un `SpeedDial` para añadir producto a mano o escaneando código de barras.
-    Cada tarjeta es un `<button>` (`ProductCard`) que navega a `EditProduct` con
+  - `Products` (`/productos`) — grid de productos reales (`useGetProductsQuery`, vía
+    `productsApi`), con un `SpeedDial` para añadir producto a mano o escaneando código de barras.
+    No es una página de "nevera": lista todos los productos que se compran o se han comprado
+    alguna vez. Cada tarjeta es un `<button>` (`ProductCard`) que navega a `EditProduct` con
     `buildEditProductPath(product.id)`, pasando el producto ya cargado por `location.state` para
     no tener que refetchear.
-  - `ScanBarcode` (`/nevera/escanear`) — abre la cámara y usa `barcode-detector` para leer el
+  - `ScanBarcode` (`/productos/escanear`) — abre la cámara y usa `barcode-detector` para leer el
     código; al detectarlo navega a `AddProduct` con `buildAddProductPath(code)`.
-  - `AddProduct` (`/nevera/anadir/:code`) — llama a `GET /products/:code` del backend
-    (`useGetProductByCodeQuery`, vía `productsApi`) y pinta los datos de Open Food Facts
+  - `AddProduct` (`/productos/anadir/:code`) — llama a `GET /product-lookup/:code` del backend
+    (`useGetProductByCodeQuery`, vía `productLookupApi`) y pinta los datos de Open Food Facts
     (nombre, foto, marca, Nutri-Score/Eco-Score/Nova, alérgenos) junto a un formulario con los
     campos que Open Food Facts no provee y hay que rellenar a mano (descripción, categoría,
     fecha de caducidad, cantidad total del envase + unidad g/ml, cantidad restante %, comentario).
@@ -184,13 +187,13 @@ yarn preview   # sirve el build de producción localmente
     string libre `productQuantity` de Open Food Facts (ej. "500 g", "1 l") con `parseOffQuantity`
     en `AddProduct.tsx`; si no se puede parsear, el usuario la introduce a mano. Es el total del
     envase, no confundir con la cantidad restante % (slider). El submit llama a
-    `useAddFridgeProductMutation` (`POST /fridge-products`) y redirige a `Fridge`.
-  - `EditProduct` (`/nevera/:id/editar`) — mismo formulario que `AddProduct` (descripción,
+    `useAddProductMutation` (`POST /products`) y redirige a `Products`.
+  - `EditProduct` (`/productos/:id/editar`) — mismo formulario que `AddProduct` (descripción,
     categoría, fecha de caducidad, cantidad total + unidad g/ml, cantidad restante %, comentario)
     pero para un producto ya guardado: lee el producto de `location.state` si viene de tocar una
-    tarjeta en `Fridge`, o si no (ej. recarga directa de la URL) lo busca por `id` dentro de
-    `useGetFridgeProductsQuery()`. Tiene botón "Guardar" (`useUpdateFridgeProductMutation`,
-    `PUT /fridge-products/:id`) y botón "Borrar producto" (`useDeleteFridgeProductMutation`,
-    `DELETE /fridge-products/:id`, con `window.confirm` antes de borrar). Ambos redirigen a
-    `Fridge` al terminar.
+    tarjeta en `Products`, o si no (ej. recarga directa de la URL) lo busca por `id` dentro de
+    `useGetProductsQuery()`. Tiene botón "Guardar" (`useUpdateProductMutation`,
+    `PUT /products/:id`) y botón "Borrar producto" (`useDeleteProductMutation`,
+    `DELETE /products/:id`, con `window.confirm` antes de borrar). Ambos redirigen a
+    `Products` al terminar.
 - Sin dark mode configurado (solo `mode: 'light'` en el tema de MUI).

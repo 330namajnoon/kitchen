@@ -6,28 +6,28 @@ import CircularProgress from '@mui/material/CircularProgress'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import SpeedDial from '@mui/material/SpeedDial'
 import SpeedDialAction from '@mui/material/SpeedDialAction'
-import { useGetFridgeProductsQuery } from '@/services/fridgeApi'
+import { useGetProductsQuery } from '@/services/productsApi'
 import { buildEditProductPath, paths } from '@/routes/paths'
 import {
   CenteredState,
-  FridgeWrapper,
   PageTitle,
   ProductCard,
   ProductGrid,
   ProductName,
   ProductPhoto,
   ProductPhotoPlaceholder,
-} from './Fridge.styles'
+  ProductsWrapper,
+} from './Products.styles'
 import { Add } from '@mui/icons-material'
 
-export const Fridge = () => {
+export const Products = () => {
   const navigate = useNavigate()
   const [addMenuOpen, setAddMenuOpen] = useState(false)
-  const { data: products, isLoading, isError } = useGetFridgeProductsQuery()
+  const { data: products, isLoading, isError } = useGetProductsQuery()
 
   return (
-    <FridgeWrapper>
-      <PageTitle>Nevera</PageTitle>
+    <ProductsWrapper>
+      <PageTitle>Productos</PageTitle>
 
       {isLoading && (
         <CenteredState>
@@ -35,10 +35,10 @@ export const Fridge = () => {
         </CenteredState>
       )}
 
-      {isError && <CenteredState>No se han podido cargar los productos de la nevera.</CenteredState>}
+      {isError && <CenteredState>No se han podido cargar los productos.</CenteredState>}
 
       {!isLoading && !isError && products?.length === 0 && (
-        <CenteredState>Todavía no hay productos en la nevera.</CenteredState>
+        <CenteredState>Todavía no hay productos.</CenteredState>
       )}
 
       {!isLoading && !isError && (products?.length ?? 0) > 0 && (
@@ -88,6 +88,6 @@ export const Fridge = () => {
           />
         </SpeedDial>
       </ClickAwayListener>
-    </FridgeWrapper>
+    </ProductsWrapper>
   )
 }

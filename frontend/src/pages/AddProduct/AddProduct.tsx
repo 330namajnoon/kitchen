@@ -11,8 +11,8 @@ import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
-import { useGetProductByCodeQuery } from '@/services/productsApi'
-import { useAddFridgeProductMutation } from '@/services/fridgeApi'
+import { useGetProductByCodeQuery } from '@/services/productLookupApi'
+import { useAddProductMutation } from '@/services/productsApi'
 import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
 import type { QuantityUnit } from '@/types/product'
@@ -91,7 +91,7 @@ export const AddProduct = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { data, isLoading, isError, error } = useGetProductByCodeQuery(code, { skip: !code })
-  const [addFridgeProduct, { isLoading: isSaving }] = useAddFridgeProductMutation()
+  const [addProduct, { isLoading: isSaving }] = useAddProductMutation()
   const { data: genericProducts } = useGetGenericProductsQuery()
 
   const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
@@ -118,7 +118,7 @@ export const AddProduct = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        await addFridgeProduct({
+        await addProduct({
           barcode: code,
           name: data?.productName,
           photoUrl: data?.productImageFrontUrl ?? data?.productImage,
@@ -133,7 +133,7 @@ export const AddProduct = () => {
           genericProductId: values.genericProductId ?? undefined,
         }).unwrap()
         sessionStorage.removeItem(DRAFT_STORAGE_KEY)
-        navigate(paths.fridge)
+        navigate(paths.products)
       } catch {
         // el error se muestra debajo del formulario
       }
@@ -241,7 +241,7 @@ export const AddProduct = () => {
         </ProductInfo>
       </ProductHeader>
 
-      <SectionTitle>Datos de la nevera</SectionTitle>
+      <SectionTitle>Datos del producto</SectionTitle>
 
       <Form onSubmit={formik.handleSubmit}>
         <GenericProductRow>
@@ -369,7 +369,7 @@ export const AddProduct = () => {
         />
 
         <Button type="submit" variant="contained" fullWidth disabled={isSaving}>
-          {isSaving ? <CircularProgress size={24} /> : 'Guardar en la nevera'}
+          {isSaving ? <CircularProgress size={24} /> : 'Guardar producto'}
         </Button>
       </Form>
     </AddProductWrapper>

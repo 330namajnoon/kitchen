@@ -1,50 +1,143 @@
 import { createController } from "sm-express-server";
 
 import {
-  getProductByBarcode,
-  ProductLookupError,
+  createProduct,
+  deleteProduct,
+  getProducts,
+  updateProduct,
 } from "@/services/product.service";
 import { logger } from "@/utils/logger";
 
-export const getProduct = createController(async (req, res) => {
-  const { barcode } = req.params;
+const isNotFoundError = (error: unknown) =>
+  typeof error === "object" && error !== null && "code" in error && (error as { code: unknown }).code === "P2025";
+
+export const addProduct = createController(async (req, res) => {
+  const {
+    barcode,
+    name,
+    photoUrl,
+    description,
+    category,
+    expirationDate,
+    quantityAmount,
+    quantityUnit,
+    quantityRemaining,
+    price,
+    comment,
+    genericProductId,
+  } = req.body;
+
+  if (
+    !barcode ||
+    !description ||
+    !category ||
+    !expirationDate ||
+    quantityAmount === undefined ||
+    !quantityUnit ||
+    quantityRemaining === undefined
+  ) {
+    res.status(400).json({ error: "Faltan campos obligatorios" });
+    return;
+  }
 
   try {
-    const product = await getProductByBarcode(barcode);
-    res.json({
-      productName: product.product_name,
-      productImage: product.image_url,
-      productBrands: product.brands,
-      productQuantity: product.quantity,
-      productNutriscore: product.nutriscore_grade,
-      productNovaGroup: product.nova_group,
-      productEcoscore: product.ecoscore_grade,
-      productIngredients: product.ingredients_text,
-      productAllergens: product.allergens_tags,
-      productNutriments: product.nutriments,
-      productCategories: product.categories_tags,
-      productLabels: product.labels_tags,
-      productCountries: product.countries_tags,
-      productCompleteness: product.completeness,
-      productIngredientsAnalysis: product.ingredients_analysis_tags,
-      productGenericName: product.generic_name,
-      productGenericNameEs: product.generic_name_es,
-      productIngredientsTextEs: product.ingredients_text_es,
-      productImageFrontUrl: product.image_front_url,
-      productImageFrontSmallUrl: product.image_front_small_url,
-      productImageIngredientsUrl: product.image_ingredients_url,
-      productImageNutritionUrl: product.image_nutrition_url,
-      productBrandsTags: product.brands_tags,
-      productNutriscore2023Tags: product.nutriscore_2023_tags,
-      productEcoscoreTags: product.ecoscore_tags,
+    const product = await createProduct({
+      barcode,
+      name,
+      photoUrl,
+      description,
+      category,
+      expirationDate,
+      quantityAmount: Number(quantityAmount),
+      quantityUnit,
+      quantityRemaining: Number(quantityRemaining),
+      price: price === undefined ? undefined : Number(price),
+      comment,
+      genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
     });
+    res.status(201).json(product);
   } catch (error) {
-    if (error instanceof ProductLookupError) {
-      res.status(error.status).json({ error: error.message });
+    logger.error("Error guardando producto", error);
+    res.status(500).json({ error: "No se pudo guardar el producto" });
+  }
+});
+
+export const listProducts = createController(async (_req, res) => {
+  try {
+    const products = await getProducts();
+    res.json(products);
+  } catch (error) {
+    logger.error("Error obteniendo productos", error);
+    res.status(500).json({ error: "No se pudo obtener el listado de productos" });
+  }
+});
+
+export const editProduct = createController(async (req, res) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    res.status(400).json({ error: "Identificador de producto inválido" });
+    return;
+  }
+
+  const {
+    barcode,
+    name,
+    photoUrl,
+    description,
+    category,
+    expirationDate,
+    quantityAmount,
+    quantityUnit,
+    quantityRemaining,
+    price,
+    comment,
+    genericProductId,
+  } = req.body;
+
+  try {
+    const product = await updateProduct(id, {
+      barcode,
+      name,
+      photoUrl,
+      description,
+      category,
+      expirationDate,
+      quantityAmount: quantityAmount === undefined ? undefined : Number(quantityAmount),
+      quantityUnit,
+      quantityRemaining: quantityRemaining === undefined ? undefined : Number(quantityRemaining),
+      price: price === undefined ? undefined : Number(price),
+      comment,
+      genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
+    });
+    res.json(product);
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      res.status(404).json({ error: "No se ha encontrado el producto" });
       return;
     }
+    logger.error("Error actualizando producto", error);
+    res.status(500).json({ error: "No se pudo actualizar el producto" });
+  }
+});
 
-    logger.error("Error consultando Open Food Facts", error);
-    res.status(502).json({ error: "No se pudo consultar Open Food Facts" });
+export const removeProduct = createController(async (req, res) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    res.status(400).json({ error: "Identificador de producto inválido" });
+    return;
+  }
+
+  try {
+    await deleteProduct(id);
+    res.status(204).send();
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      res.status(404).json({ error: "No se ha encontrado el producto" });
+      return;
+    }
+    logger.error("Error borrando producto", error);
+    res.status(500).json({ error: "No se pudo borrar el producto" });
   }
 });

@@ -39,5 +39,19 @@ model FridgeProduct {
   comment           String?       @db.VarChar(1000)
   createdAt         DateTime      @default(now())
 
+  genericProductId Int?
+  genericProduct   GenericProduct? @relation(fields: [genericProductId], references: [id])
+
   @@map("fridge_products")
+}
+
+model GenericProduct {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(255)
+  description String?  @db.VarChar(500)
+  createdAt   DateTime @default(now())
+
+  fridgeProducts FridgeProduct[]
+
+  @@map("generic_products")
 }

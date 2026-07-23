@@ -23,6 +23,7 @@ export const addFridgeProduct = createController(async (req, res) => {
     quantityUnit,
     quantityRemaining,
     comment,
+    genericProductId,
   } = req.body;
 
   if (
@@ -50,6 +51,7 @@ export const addFridgeProduct = createController(async (req, res) => {
       quantityUnit,
       quantityRemaining: Number(quantityRemaining),
       comment,
+      genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
     });
     res.status(201).json(product);
   } catch (error) {
@@ -87,6 +89,7 @@ export const editFridgeProduct = createController(async (req, res) => {
     quantityUnit,
     quantityRemaining,
     comment,
+    genericProductId,
   } = req.body;
 
   try {
@@ -101,6 +104,7 @@ export const editFridgeProduct = createController(async (req, res) => {
       quantityUnit,
       quantityRemaining: quantityRemaining === undefined ? undefined : Number(quantityRemaining),
       comment,
+      genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
     });
     res.json(product);
   } catch (error) {

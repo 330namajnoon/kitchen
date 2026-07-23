@@ -123,6 +123,16 @@ export const QuantityRow = styled.div`
   }
 `
 
+export const GenericProductRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  > :first-child {
+    flex: 1;
+  }
+`
+
 export const SliderRow = styled.div`
   display: flex;
   flex-direction: column;

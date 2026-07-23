@@ -1,21 +1,28 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import Add from '@mui/icons-material/Add'
+import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
+import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
 import { useGetProductByCodeQuery } from '@/services/productsApi'
 import { useAddFridgeProductMutation } from '@/services/fridgeApi'
+import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
 import type { QuantityUnit } from '@/types/product'
+import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
 import {
   AddProductWrapper,
   CenteredState,
   ChipsRow,
   Form,
+  GenericProductRow,
   ProductBrand,
   ProductHeader,
   ProductInfo,
@@ -27,6 +34,8 @@ import {
   SliderLabel,
   SliderRow,
 } from './AddProduct.styles'
+
+const DRAFT_STORAGE_KEY = 'kitchen:addProductDraft'
 
 /** Convierte un tag de Open Food Facts (ej. "en:whole-milk") en texto legible. */
 const formatTag = (tag: string) => {
@@ -61,6 +70,7 @@ const validationSchema = yup.object({
   quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml']).required(),
   quantityRemaining: yup.number().min(0).max(100).required(),
   comment: yup.string(),
+  genericProductId: yup.number().nullable().required('Selecciona un producto genérico'),
 })
 
 interface AddProductFormValues {
@@ -71,17 +81,24 @@ interface AddProductFormValues {
   quantityUnit: QuantityUnit
   quantityRemaining: number
   comment: string
+  genericProductId: number | null
 }
 
 export const AddProduct = () => {
   const { code = '' } = useParams<{ code: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { data, isLoading, isError, error } = useGetProductByCodeQuery(code, { skip: !code })
   const [addFridgeProduct, { isLoading: isSaving }] = useAddFridgeProductMutation()
+  const { data: genericProducts } = useGetGenericProductsQuery()
 
   const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
   const suggestedCategory = data?.productCategories?.[0] ? formatTag(data.productCategories[0]) : ''
   const suggestedQuantity = data?.productQuantity ? parseOffQuantity(data.productQuantity) : null
+  const suggestedGenericProduct = findMatchingGenericProduct(
+    [suggestedDescription, suggestedCategory, data?.productName, data?.productGenericName, data?.productGenericNameEs],
+    genericProducts,
+  )
 
   const formik = useFormik<AddProductFormValues>({
     enableReinitialize: true,
@@ -93,6 +110,7 @@ export const AddProduct = () => {
       quantityUnit: suggestedQuantity?.unit ?? 'g',
       quantityRemaining: 100,
       comment: '',
+      genericProductId: suggestedGenericProduct?.id ?? null,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -108,13 +126,45 @@ export const AddProduct = () => {
           quantityUnit: values.quantityUnit,
           quantityRemaining: values.quantityRemaining,
           comment: values.comment,
+          genericProductId: values.genericProductId ?? undefined,
         }).unwrap()
+        sessionStorage.removeItem(DRAFT_STORAGE_KEY)
         navigate(paths.fridge)
       } catch {
         // el error se muestra debajo del formulario
       }
     },
   })
+
+  // Restaura el borrador del formulario tras volver de crear un producto genérico nuevo.
+  useEffect(() => {
+    const draft = sessionStorage.getItem(DRAFT_STORAGE_KEY)
+    if (draft) {
+      sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+      try {
+        formik.setValues((prev) => ({ ...prev, ...JSON.parse(draft) }))
+      } catch {
+        // borrador corrupto, se ignora
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const state = location.state as { createdGenericProductId?: number } | null
+    if (state?.createdGenericProductId) {
+      formik.setFieldValue('genericProductId', state.createdGenericProductId)
+      navigate(location.pathname, { replace: true, state: null })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
+
+  const selectedGenericProduct = genericProducts?.find((item) => item.id === formik.values.genericProductId) ?? null
+
+  const handleCreateGenericProduct = () => {
+    sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formik.values))
+    navigate(paths.addGenericProduct, { state: { returnTo: location.pathname } })
+  }
 
   if (!code) {
     return (
@@ -190,6 +240,29 @@ export const AddProduct = () => {
       <SectionTitle>Datos de la nevera</SectionTitle>
 
       <Form onSubmit={formik.handleSubmit}>
+        <GenericProductRow>
+          <Autocomplete
+            options={genericProducts ?? []}
+            getOptionLabel={(option) => option.name}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            value={selectedGenericProduct}
+            onChange={(_event, value) => formik.setFieldValue('genericProductId', value?.id ?? null)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                name="genericProductId"
+                label="Producto genérico"
+                onBlur={() => formik.setFieldTouched('genericProductId', true)}
+                error={formik.touched.genericProductId && Boolean(formik.errors.genericProductId)}
+                helperText={formik.touched.genericProductId && formik.errors.genericProductId}
+              />
+            )}
+          />
+          <IconButton aria-label="Crear producto genérico" color="primary" onClick={handleCreateGenericProduct}>
+            <Add />
+          </IconButton>
+        </GenericProductRow>
+
         <TextField
           name="description"
           label="Descripción"

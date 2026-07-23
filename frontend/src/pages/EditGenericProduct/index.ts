@@ -1,0 +1,1 @@
+export { EditGenericProduct } from './EditGenericProduct'

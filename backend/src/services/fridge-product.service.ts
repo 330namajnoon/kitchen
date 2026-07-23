@@ -11,6 +11,7 @@ export interface CreateFridgeProductInput {
   quantityUnit: "g" | "ml";
   quantityRemaining: number;
   comment?: string;
+  genericProductId?: number;
 }
 
 export async function createFridgeProduct(input: CreateFridgeProductInput) {
@@ -26,6 +27,7 @@ export async function createFridgeProduct(input: CreateFridgeProductInput) {
       quantityUnit: input.quantityUnit,
       quantityRemaining: input.quantityRemaining,
       comment: input.comment,
+      genericProductId: input.genericProductId,
     },
   });
 }
@@ -33,6 +35,7 @@ export async function createFridgeProduct(input: CreateFridgeProductInput) {
 export async function getFridgeProducts() {
   return prisma.fridgeProduct.findMany({
     orderBy: { createdAt: "desc" },
+    include: { genericProduct: true },
   });
 }
 
@@ -47,6 +50,7 @@ export interface UpdateFridgeProductInput {
   quantityUnit?: "g" | "ml";
   quantityRemaining?: number;
   comment?: string;
+  genericProductId?: number;
 }
 
 export async function updateFridgeProduct(id: number, input: UpdateFridgeProductInput) {
@@ -63,7 +67,9 @@ export async function updateFridgeProduct(id: number, input: UpdateFridgeProduct
       quantityUnit: input.quantityUnit,
       quantityRemaining: input.quantityRemaining,
       comment: input.comment,
+      genericProductId: input.genericProductId,
     },
+    include: { genericProduct: true },
   });
 }
 

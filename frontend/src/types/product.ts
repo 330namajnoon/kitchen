@@ -11,6 +11,8 @@ export interface ProductNutriments {
   sodium_100g?: number
 }
 
+import type { GenericProduct } from './genericProduct'
+
 export type QuantityUnit = 'g' | 'ml'
 
 export interface AddFridgeProductRequest {
@@ -24,11 +26,13 @@ export interface AddFridgeProductRequest {
   quantityUnit: QuantityUnit
   quantityRemaining: number
   comment?: string
+  genericProductId?: number
 }
 
 export interface FridgeProduct extends AddFridgeProductRequest {
   id: number
   createdAt: string
+  genericProduct?: GenericProduct
 }
 
 export interface UpdateFridgeProductRequest extends Partial<AddFridgeProductRequest> {

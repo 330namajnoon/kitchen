@@ -1,0 +1,1 @@
+export { GenericProducts } from './GenericProducts'

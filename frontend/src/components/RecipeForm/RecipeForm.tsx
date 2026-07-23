@@ -68,6 +68,19 @@ export const RecipeForm = ({
         fullWidth
       />
 
+      <TextField
+        name="servings"
+        label="Raciones (opcional)"
+        type="number"
+        value={formik.values.servings}
+        onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        error={formik.touched.servings && Boolean(formik.errors.servings)}
+        helperText={formik.touched.servings && formik.errors.servings}
+        slotProps={{ htmlInput: { min: 1, step: 1 } }}
+        fullWidth
+      />
+
       <SectionTitle>Ingredientes</SectionTitle>
 
       <RecipeIngredientsEditor

@@ -16,6 +16,7 @@ export interface AddRecipeRequest {
   name: string
   description: string
   photoUrl?: string
+  servings?: number
   ingredients: RecipeIngredientInput[]
 }
 
@@ -33,5 +34,6 @@ export interface RecipeFormValues {
   name: string
   description: string
   photoUrl: string
+  servings: number | ''
   ingredients: RecipeIngredientInput[]
 }

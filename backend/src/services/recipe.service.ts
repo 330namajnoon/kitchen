@@ -10,6 +10,7 @@ export interface CreateRecipeInput {
   name: string;
   description: string;
   photoUrl?: string;
+  servings?: number;
   ingredients: RecipeIngredientInput[];
 }
 
@@ -23,6 +24,7 @@ export async function createRecipe(input: CreateRecipeInput) {
       name: input.name,
       description: input.description,
       photoUrl: input.photoUrl,
+      servings: input.servings,
       ingredients: {
         create: input.ingredients.map((ingredient) => ({
           genericProductId: ingredient.genericProductId,
@@ -46,6 +48,7 @@ export interface UpdateRecipeInput {
   name?: string;
   description?: string;
   photoUrl?: string;
+  servings?: number;
   ingredients?: RecipeIngredientInput[];
 }
 
@@ -61,6 +64,7 @@ export async function updateRecipe(id: number, input: UpdateRecipeInput) {
         name: input.name,
         description: input.description,
         photoUrl: input.photoUrl,
+        servings: input.servings,
         ingredients: input.ingredients
           ? {
               create: input.ingredients.map((ingredient) => ({

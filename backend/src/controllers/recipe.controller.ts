@@ -40,7 +40,7 @@ const parseIngredients = (input: unknown): RecipeIngredientInput[] | null => {
 };
 
 export const addRecipe = createController(async (req, res) => {
-  const { name, description, photoUrl, ingredients } = req.body;
+  const { name, description, photoUrl, servings, ingredients } = req.body;
 
   if (!name || !description) {
     res.status(400).json({ error: "Faltan campos obligatorios" });
@@ -54,7 +54,13 @@ export const addRecipe = createController(async (req, res) => {
   }
 
   try {
-    const recipe = await createRecipe({ name, description, photoUrl, ingredients: parsedIngredients });
+    const recipe = await createRecipe({
+      name,
+      description,
+      photoUrl,
+      servings: servings === undefined ? undefined : Number(servings),
+      ingredients: parsedIngredients,
+    });
     res.status(201).json(recipe);
   } catch (error) {
     logger.error("Error guardando receta", error);
@@ -80,7 +86,7 @@ export const editRecipe = createController(async (req, res) => {
     return;
   }
 
-  const { name, description, photoUrl, ingredients } = req.body;
+  const { name, description, photoUrl, servings, ingredients } = req.body;
 
   let parsedIngredients: RecipeIngredientInput[] | undefined;
   if (ingredients !== undefined) {
@@ -93,7 +99,13 @@ export const editRecipe = createController(async (req, res) => {
   }
 
   try {
-    const recipe = await updateRecipe(id, { name, description, photoUrl, ingredients: parsedIngredients });
+    const recipe = await updateRecipe(id, {
+      name,
+      description,
+      photoUrl,
+      servings: servings === undefined ? undefined : Number(servings),
+      ingredients: parsedIngredients,
+    });
     res.json(recipe);
   } catch (error) {
     if (isNotFoundError(error)) {

@@ -18,6 +18,12 @@ const validationSchema = yup.object({
   name: yup.string().trim().required('El nombre es obligatorio'),
   description: yup.string().trim().required('La descripción es obligatoria'),
   photoUrl: yup.string(),
+  servings: yup
+    .number()
+    .typeError('Introduce un número de raciones')
+    .integer('Introduce un número entero')
+    .positive('Debe ser mayor que 0')
+    .nullable(),
   ingredients: yup.array().min(1, 'Añade al menos un ingrediente'),
 })
 
@@ -42,6 +48,7 @@ export const EditRecipe = () => {
       name: recipe?.name ?? '',
       description: recipe?.description ?? '',
       photoUrl: recipe?.photoUrl ?? '',
+      servings: recipe?.servings ?? '',
       ingredients: recipe?.ingredients.map(({ genericProductId, quantityAmount, quantityUnit }) => ({
         genericProductId,
         quantityAmount,
@@ -56,6 +63,7 @@ export const EditRecipe = () => {
           name: values.name,
           description: values.description,
           photoUrl: values.photoUrl || undefined,
+          servings: values.servings === '' ? undefined : Number(values.servings),
           ingredients: values.ingredients,
         }).unwrap()
         sessionStorage.removeItem(DRAFT_STORAGE_KEY)

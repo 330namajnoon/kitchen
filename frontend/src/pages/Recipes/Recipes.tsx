@@ -76,7 +76,7 @@ export const Recipes = () => {
         color="primary"
         aria-label="Añadir receta"
         onClick={() => navigate(paths.addRecipe)}
-        sx={{ position: 'fixed', bottom: 24, right: 24 }}
+        sx={{ position: 'fixed', bottom: { xs: 92, sm: 24 }, right: 24 }}
       >
         <Add />
       </Fab>

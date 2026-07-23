@@ -65,7 +65,7 @@ export const Products = () => {
           ariaLabel="Añadir producto"
           open={addMenuOpen}
           onClick={() => setAddMenuOpen((open) => !open)}
-          sx={{ position: 'fixed', bottom: 24, right: 24 }}
+          sx={{ position: 'fixed', bottom: { xs: 92, sm: 24 }, right: 24 }}
         >
           <SpeedDialAction
             icon={<EditNoteIcon />}

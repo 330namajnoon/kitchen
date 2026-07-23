@@ -80,7 +80,7 @@ export const GenericProducts = () => {
         color="primary"
         aria-label="Añadir producto genérico"
         onClick={() => navigate(paths.addGenericProduct)}
-        sx={{ position: 'fixed', bottom: 24, right: 24 }}
+        sx={{ position: 'fixed', bottom: { xs: 92, sm: 24 }, right: 24 }}
       >
         <Add />
       </Fab>

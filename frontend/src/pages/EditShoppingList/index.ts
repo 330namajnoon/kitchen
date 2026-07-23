@@ -1,0 +1,1 @@
+export { EditShoppingList } from './EditShoppingList'

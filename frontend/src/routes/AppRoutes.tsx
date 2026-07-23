@@ -3,16 +3,19 @@ import { MainLayout } from '@/layouts/MainLayout'
 import { AddGenericProduct } from '@/pages/AddGenericProduct'
 import { AddProduct } from '@/pages/AddProduct'
 import { AddRecipe } from '@/pages/AddRecipe'
+import { AddShoppingList } from '@/pages/AddShoppingList'
 import { DetectProduct } from '@/pages/DetectProduct'
 import { EditGenericProduct } from '@/pages/EditGenericProduct'
 import { EditProduct } from '@/pages/EditProduct'
 import { EditRecipe } from '@/pages/EditRecipe'
+import { EditShoppingList } from '@/pages/EditShoppingList'
 import { GenericProducts } from '@/pages/GenericProducts'
 import { Home } from '@/pages/Home'
 import { Login } from '@/pages/Login'
 import { Products } from '@/pages/Products'
 import { Recipes } from '@/pages/Recipes'
 import { ScanBarcode } from '@/pages/ScanBarcode'
+import { ShoppingLists } from '@/pages/ShoppingLists'
 import { paths } from './paths'
 
 export const AppRoutes = () => {
@@ -30,6 +33,9 @@ export const AppRoutes = () => {
         <Route path={paths.recipes} element={<Recipes />} />
         <Route path={paths.addRecipe} element={<AddRecipe />} />
         <Route path={paths.editRecipe} element={<EditRecipe />} />
+        <Route path={paths.shoppingLists} element={<ShoppingLists />} />
+        <Route path={paths.addShoppingList} element={<AddShoppingList />} />
+        <Route path={paths.editShoppingList} element={<EditShoppingList />} />
       </Route>
       <Route path={paths.scanBarcode} element={<ScanBarcode />} />
       <Route path={paths.detectProduct} element={<DetectProduct />} />

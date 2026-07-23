@@ -12,9 +12,13 @@ export const paths = {
   recipes: '/recetas',
   addRecipe: '/recetas/anadir',
   editRecipe: '/recetas/:id/editar',
+  shoppingLists: '/listas-compra',
+  addShoppingList: '/listas-compra/anadir',
+  editShoppingList: '/listas-compra/:id/editar',
 } as const
 
 export const buildAddProductPath = (code: string) => `/productos/anadir/${code}`
 export const buildEditProductPath = (id: number) => `/productos/${id}/editar`
 export const buildEditGenericProductPath = (id: number) => `/productos-genericos/${id}/editar`
 export const buildEditRecipePath = (id: number) => `/recetas/${id}/editar`
+export const buildEditShoppingListPath = (id: number) => `/listas-compra/${id}/editar`

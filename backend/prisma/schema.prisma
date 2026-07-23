@@ -26,6 +26,11 @@ enum QuantityUnit {
   u
 }
 
+enum ShoppingListStatus {
+  pending
+  completed
+}
+
 model Product {
   id                Int           @id @default(autoincrement())
   barcode           String        @db.VarChar(64)
@@ -55,6 +60,7 @@ model GenericProduct {
 
   products          Product[]
   recipeIngredients RecipeIngredient[]
+  shoppingListItems ShoppingListItem[]
 
   @@map("generic_products")
 }
@@ -84,4 +90,29 @@ model RecipeIngredient {
   genericProduct   GenericProduct @relation(fields: [genericProductId], references: [id])
 
   @@map("recipe_ingredients")
+}
+
+model ShoppingList {
+  id                    Int                @id @default(autoincrement())
+  estimatedPurchaseDate DateTime           @db.Date
+  status                ShoppingListStatus @default(pending)
+  createdAt             DateTime           @default(now())
+
+  items ShoppingListItem[]
+
+  @@map("shopping_lists")
+}
+
+model ShoppingListItem {
+  id             Int          @id @default(autoincrement())
+  quantityAmount Float
+  quantityUnit   QuantityUnit
+
+  shoppingListId Int
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+
+  genericProductId Int
+  genericProduct   GenericProduct @relation(fields: [genericProductId], references: [id])
+
+  @@map("shopping_list_items")
 }

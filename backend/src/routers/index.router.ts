@@ -6,6 +6,7 @@ import { productRouter } from "@/routers/product.router";
 import { productDetectRouter } from "@/routers/product-detect.router";
 import { productLookupRouter } from "@/routers/product-lookup.router";
 import { recipeRouter } from "@/routers/recipe.router";
+import { shoppingListRouter } from "@/routers/shopping-list.router";
 
 export const routers: RouterDefinition[] = [
   healthRouter,
@@ -14,4 +15,5 @@ export const routers: RouterDefinition[] = [
   productRouter,
   genericProductRouter,
   recipeRouter,
+  shoppingListRouter,
 ];

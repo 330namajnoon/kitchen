@@ -46,23 +46,52 @@ export const RecipeGrid = styled.div`
   }
 `
 
-export const RecipeCard = styled.button`
+export const RecipeCard = styled.button<{ $selected?: boolean }>`
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: ${({ theme }) => theme.colors.background.paper};
-  border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
+  background-color: ${({ theme, $selected }) => ($selected ? theme.colors.primary.lightest : theme.colors.background.paper)};
+  border: 1px solid ${({ theme, $selected }) => ($selected ? theme.colors.primary.main : theme.colors.neutral[200])};
   border-radius: 12px;
   cursor: pointer;
   font: inherit;
   text-align: center;
   appearance: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary.light};
   }
+`
+
+export const RecipeSelectedBadge = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.colors.primary.main};
+  color: ${({ theme }) => theme.colors.primary.contrastText};
+  font-size: 0.75rem;
+  line-height: 1;
+`
+
+export const SelectionBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 24px -8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.primary};
 `
 
 export const RecipePhoto = styled.img`

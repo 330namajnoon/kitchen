@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Add from '@mui/icons-material/Add'
+import Close from '@mui/icons-material/Close'
+import ShoppingCart from '@mui/icons-material/ShoppingCart'
+import SoupKitchen from '@mui/icons-material/SoupKitchen'
 import CircularProgress from '@mui/material/CircularProgress'
 import Fab from '@mui/material/Fab'
+import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import { useGetRecipesQuery } from '@/services/recipesApi'
 import { buildEditRecipePath, paths } from '@/routes/paths'
@@ -15,13 +19,23 @@ import {
   RecipePhoto,
   RecipePhotoPlaceholder,
   RecipesWrapper,
+  RecipeSelectedBadge,
   SearchField,
+  SelectionBar,
 } from './Recipes.styles'
+
+const LONG_PRESS_MS = 500
 
 export const Recipes = () => {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
   const { data: recipes, isLoading, isError } = useGetRecipesQuery()
+
+  const longPressTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const longPressTriggered = useRef(false)
+
+  const isSelecting = selectedIds.length > 0
 
   const normalizedSearch = search.trim().toLowerCase()
   const filteredRecipes = recipes?.filter(
@@ -31,9 +45,56 @@ export const Recipes = () => {
       recipe.description.toLowerCase().includes(normalizedSearch),
   )
 
+  const toggleSelected = (id: number) => {
+    setSelectedIds((current) => (current.includes(id) ? current.filter((selectedId) => selectedId !== id) : [...current, id]))
+  }
+
+  const startLongPress = (id: number) => {
+    longPressTriggered.current = false
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true
+      toggleSelected(id)
+    }, LONG_PRESS_MS)
+  }
+
+  const cancelLongPress = () => {
+    clearTimeout(longPressTimer.current)
+  }
+
+  const handleCardClick = (recipe: NonNullable<typeof recipes>[number]) => {
+    if (longPressTriggered.current) {
+      longPressTriggered.current = false
+      return
+    }
+
+    if (isSelecting) {
+      toggleSelected(recipe.id)
+      return
+    }
+
+    navigate(buildEditRecipePath(recipe.id), { state: { recipe } })
+  }
+
+  const handlePrepare = () => {
+    // TODO: preparar las recetas seleccionadas
+  }
+
+  const handleGoToShoppingList = () => {
+    // TODO: ir a la lista de la compra con las recetas seleccionadas
+  }
+
   return (
     <RecipesWrapper>
-      <PageTitle>Recetas</PageTitle>
+      {isSelecting ? (
+        <SelectionBar>
+          <IconButton aria-label="Cancelar selección" onClick={() => setSelectedIds([])}>
+            <Close />
+          </IconButton>
+          {selectedIds.length} seleccionada{selectedIds.length === 1 ? '' : 's'}
+        </SelectionBar>
+      ) : (
+        <PageTitle>Recetas</PageTitle>
+      )}
 
       {!isLoading && !isError && (recipes?.length ?? 0) > 0 && (
         <SearchField>
@@ -63,13 +124,50 @@ export const Recipes = () => {
 
       {!isLoading && !isError && (filteredRecipes?.length ?? 0) > 0 && (
         <RecipeGrid>
-          {filteredRecipes!.map((recipe) => (
-            <RecipeCard key={recipe.id} onClick={() => navigate(buildEditRecipePath(recipe.id), { state: { recipe } })}>
-              {recipe.photoUrl ? <RecipePhoto src={recipe.photoUrl} alt={recipe.name} /> : <RecipePhotoPlaceholder />}
-              <RecipeName>{recipe.name}</RecipeName>
-            </RecipeCard>
-          ))}
+          {filteredRecipes!.map((recipe) => {
+            const selected = selectedIds.includes(recipe.id)
+
+            return (
+              <RecipeCard
+                key={recipe.id}
+                $selected={selected}
+                onClick={() => handleCardClick(recipe)}
+                onMouseDown={() => startLongPress(recipe.id)}
+                onMouseUp={cancelLongPress}
+                onMouseLeave={cancelLongPress}
+                onTouchStart={() => startLongPress(recipe.id)}
+                onTouchEnd={cancelLongPress}
+                onContextMenu={(event) => event.preventDefault()}
+              >
+                {recipe.photoUrl ? <RecipePhoto src={recipe.photoUrl} alt={recipe.name} /> : <RecipePhotoPlaceholder />}
+                <RecipeName>{recipe.name}</RecipeName>
+                {selected && <RecipeSelectedBadge>✓</RecipeSelectedBadge>}
+              </RecipeCard>
+            )
+          })}
         </RecipeGrid>
+      )}
+
+      {isSelecting && (
+        <>
+          <Fab
+            color="secondary"
+            aria-label="Preparar recetas seleccionadas"
+            onClick={handlePrepare}
+            sx={{ position: 'fixed', bottom: { xs: 220, sm: 152 }, right: 24 }}
+          >
+            <SoupKitchen />
+          </Fab>
+
+          <Fab
+            color="secondary"
+            aria-label="Ir a la lista de la compra"
+            onClick={handleGoToShoppingList}
+            sx={{ position: 'fixed', bottom: { xs: 156, sm: 88 }, right: 24 }}
+          >
+            <ShoppingCart />
+          </Fab>
+        </>
       )}
 
       <Fab

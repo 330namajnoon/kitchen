@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -51,34 +51,52 @@ export const AddRecipe = () => {
     },
   })
 
-  // Restaura el borrador del formulario tras volver de crear un producto genérico nuevo.
+  // Restaura el borrador del formulario tras volver de crear un producto genérico nuevo, y añade
+  // ese producto a los ingredientes. Va en un único efecto porque ambos pasos parten del mismo
+  // montaje (crear un producto genérico navega a otra ruta, así que esta página se remonta al
+  // volver): repartirlo en dos efectos separados provoca que el segundo lea `formik.values`
+  // antes de que el primero termine de restaurar el borrador y lo pise. El guard con `ref` evita
+  // que, en StrictMode, la doble invocación del efecto vuelva a ejecutar la restauración con el
+  // sessionStorage ya vaciado por la primera pasada, machacando los valores con el estado inicial.
+  const hasHydratedDraft = useRef(false)
   useEffect(() => {
-    const draft = sessionStorage.getItem(DRAFT_STORAGE_KEY)
-    if (draft) {
+    if (hasHydratedDraft.current) return
+    hasHydratedDraft.current = true
+
+    let draft: Partial<RecipeFormValues> | null = null
+    const draftRaw = sessionStorage.getItem(DRAFT_STORAGE_KEY)
+    if (draftRaw) {
       sessionStorage.removeItem(DRAFT_STORAGE_KEY)
       try {
-        formik.setValues((prev) => ({ ...prev, ...JSON.parse(draft) }))
+        draft = JSON.parse(draftRaw)
       } catch {
         // borrador corrupto, se ignora
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
-  useEffect(() => {
     const state = location.state as { createdGenericProductId?: number } | null
-    if (state?.createdGenericProductId) {
-      const alreadyAdded = formik.values.ingredients.some((ingredient) => ingredient.genericProductId === state.createdGenericProductId)
-      if (!alreadyAdded) {
-        formik.setFieldValue('ingredients', [
-          ...formik.values.ingredients,
-          { genericProductId: state.createdGenericProductId, quantityAmount: 0, quantityUnit: 'g' },
-        ])
-      }
+    const createdGenericProductId = state?.createdGenericProductId
+
+    if (draft || createdGenericProductId) {
+      const base = draft ? { ...formik.values, ...draft } : formik.values
+      const values =
+        !createdGenericProductId || base.ingredients.some((ingredient) => ingredient.genericProductId === createdGenericProductId)
+          ? base
+          : {
+              ...base,
+              ingredients: [
+                ...base.ingredients,
+                { genericProductId: createdGenericProductId, quantityAmount: 0, quantityUnit: 'g' as const },
+              ],
+            }
+      formik.setValues(values)
+    }
+
+    if (createdGenericProductId) {
       navigate(location.pathname, { replace: true, state: null })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state])
+  }, [])
 
   const handleCreateGenericProduct = () => {
     sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formik.values))

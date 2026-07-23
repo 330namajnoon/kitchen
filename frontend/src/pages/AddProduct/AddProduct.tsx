@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
 import { useGetProductByCodeQuery } from '@/services/productsApi'
+import { useAddFridgeProductMutation } from '@/services/fridgeApi'
 import { paths } from '@/routes/paths'
 import {
   AddProductWrapper,
@@ -50,6 +51,7 @@ export const AddProduct = () => {
   const { code = '' } = useParams<{ code: string }>()
   const navigate = useNavigate()
   const { data, isLoading, isError, error } = useGetProductByCodeQuery(code, { skip: !code })
+  const [addFridgeProduct, { isLoading: isSaving }] = useAddFridgeProductMutation()
 
   const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
   const suggestedCategory = data?.productCategories?.[0] ? formatTag(data.productCategories[0]) : ''
@@ -64,9 +66,22 @@ export const AddProduct = () => {
       comment: '',
     },
     validationSchema,
-    onSubmit: () => {
-      // TODO: no existe todavía un endpoint para persistir el producto en la nevera.
-      navigate(paths.fridge)
+    onSubmit: async (values) => {
+      try {
+        await addFridgeProduct({
+          barcode: code,
+          name: data?.productName,
+          photoUrl: data?.productImageFrontUrl ?? data?.productImage,
+          description: values.description,
+          category: values.category,
+          expirationDate: values.expirationDate,
+          quantityRemaining: values.quantityRemaining,
+          comment: values.comment,
+        }).unwrap()
+        navigate(paths.fridge)
+      } catch {
+        // el error se muestra debajo del formulario
+      }
     },
   })
 
@@ -206,8 +221,8 @@ export const AddProduct = () => {
           fullWidth
         />
 
-        <Button type="submit" variant="contained" fullWidth>
-          Guardar en la nevera
+        <Button type="submit" variant="contained" fullWidth disabled={isSaving}>
+          {isSaving ? <CircularProgress size={24} /> : 'Guardar en la nevera'}
         </Button>
       </Form>
     </AddProductWrapper>

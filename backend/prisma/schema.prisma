@@ -19,3 +19,18 @@ model User {
 
   @@map("users")
 }
+
+model FridgeProduct {
+  id                Int      @id @default(autoincrement())
+  barcode           String   @db.VarChar(64)
+  name              String?  @db.VarChar(255)
+  photoUrl          String?  @db.VarChar(500)
+  description       String   @db.VarChar(500)
+  category          String   @db.VarChar(100)
+  expirationDate    DateTime @db.Date
+  quantityRemaining Int      @db.TinyInt
+  comment           String?  @db.VarChar(1000)
+  createdAt         DateTime @default(now())
+
+  @@map("fridge_products")
+}

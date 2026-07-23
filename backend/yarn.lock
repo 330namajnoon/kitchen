@@ -250,6 +250,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@prisma/adapter-mariadb@npm:7.9.0":
+  version: 7.9.0
+  resolution: "@prisma/adapter-mariadb@npm:7.9.0"
+  dependencies:
+    "@prisma/driver-adapter-utils": "npm:7.9.0"
+    mariadb: "npm:3.4.5"
+  checksum: 10c0/32c04c6564351866fa06a11d3017bd131200842078cb7708929f1986a59d1404ab3916f33964e3aa2eb005b866192429393451e1ed71603994c0a9f6190cf205
+  languageName: node
+  linkType: hard
+
 "@prisma/client-runtime-utils@npm:7.9.0":
   version: 7.9.0
   resolution: "@prisma/client-runtime-utils@npm:7.9.0"
@@ -320,6 +330,15 @@ __metadata:
     valibot: "npm:1.2.0"
     zeptomatch: "npm:2.1.0"
   checksum: 10c0/0b27228e86510f14830359596ce42b441791508f9e92d1de0c54b3870636b03d5c18de1df7e3ae4dc2d0c3dc9ffe59246dccb74b7c86d6698888fe5d6d65fe07
+  languageName: node
+  linkType: hard
+
+"@prisma/driver-adapter-utils@npm:7.9.0":
+  version: 7.9.0
+  resolution: "@prisma/driver-adapter-utils@npm:7.9.0"
+  dependencies:
+    "@prisma/debug": "npm:7.9.0"
+  checksum: 10c0/bab8b43823f9f7d027fc1eec763bc61835b981ccb5f88a08adcca7c93a37b813ca87a4b2f88e721637fef9036d9a6b85313186e69e8e153872457d33c21ac8c7
   languageName: node
   linkType: hard
 
@@ -685,7 +704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.21":
+"@types/express@npm:^4, @types/express@npm:^4.17.21":
   version: 4.17.25
   resolution: "@types/express@npm:4.17.25"
   dependencies:
@@ -697,7 +716,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:*":
+"@types/geojson@npm:*, @types/geojson@npm:^7946.0.16":
   version: 7946.0.16
   resolution: "@types/geojson@npm:7946.0.16"
   checksum: 10c0/1ff24a288bd5860b766b073ead337d31d73bdc715e5b50a2cee5cb0af57a1ed02cc04ef295f5fa68dc40fe3e4f104dd31282b2b818a5ba3231bc1001ba084e3c
@@ -731,6 +750,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~8.3.0"
   checksum: 10c0/25ac5093195736dd074d5027adbba85617bc951d5a41506ebd3b9073048acb7233613f3822d5f9b9447f9c0841c91f6387c46283916767e3ef79f23917452c46
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^24.0.13":
+  version: 24.13.3
+  resolution: "@types/node@npm:24.13.3"
+  dependencies:
+    undici-types: "npm:~7.18.0"
+  checksum: 10c0/a5bc08f49b9581dcdca90e02cd77197a3c799840807664942e5cd5161a553d4d2ae8064f7e3294410d748d7d098b5c1848be7fa50c06f29c4193ab16be4e59eb
   languageName: node
   linkType: hard
 
@@ -1678,7 +1706,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.18.2":
+"express@npm:^4.18.2, express@npm:^4.22.2":
   version: 4.22.2
   resolution: "express@npm:4.22.2"
   dependencies:
@@ -2031,6 +2059,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"iconv-lite@npm:^0.6.3":
+  version: 0.6.3
+  resolution: "iconv-lite@npm:0.6.3"
+  dependencies:
+    safer-buffer: "npm:>= 2.1.2 < 3.0.0"
+  checksum: 10c0/98102bc66b33fcf5ac044099d1257ba0b7ad5e3ccd3221f34dd508ab4070edff183276221684e1e0555b145fce0850c9f7d2b60a9fcac50fbb4ea0d6e845a3b1
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:^0.7.0":
   version: 0.7.3
   resolution: "iconv-lite@npm:0.7.3"
@@ -2164,9 +2201,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kitchen-backend@workspace:."
   dependencies:
+    "@prisma/adapter-mariadb": "npm:7.9.0"
     "@prisma/client": "npm:^7.9.0"
+    "@types/express": "npm:^4"
     "@types/node": "npm:^26.1.1"
     dotenv: "npm:^17.4.2"
+    express: "npm:^4.22.2"
     prisma: "npm:^7.9.0"
     sm-express-server: "npm:^1.0.6"
     tsc-alias: "npm:^1.9.1"
@@ -2189,10 +2229,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^10.4.3":
+  version: 10.4.3
+  resolution: "lru-cache@npm:10.4.3"
+  checksum: 10c0/ebd04fbca961e6c1d6c0af3799adcc966a1babe798f685bb84e6599266599cd95d94630b10262f5424539bc4640107e8a33aa28585374abf561d30d16f4b39fb
+  languageName: node
+  linkType: hard
+
 "lru.min@npm:^1.0.0, lru.min@npm:^1.1.0":
   version: 1.1.4
   resolution: "lru.min@npm:1.1.4"
   checksum: 10c0/d9cce4d9988ced2b2dd199f47016adefda27e8405a7f63b86a54e574d254bb0099ff9e91846b0c20379348e7a03d6f4de8b8f8cdfd5265b36eb3ec07bcf72f96
+  languageName: node
+  linkType: hard
+
+"mariadb@npm:3.4.5":
+  version: 3.4.5
+  resolution: "mariadb@npm:3.4.5"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.16"
+    "@types/node": "npm:^24.0.13"
+    denque: "npm:^2.1.0"
+    iconv-lite: "npm:^0.6.3"
+    lru-cache: "npm:^10.4.3"
+  checksum: 10c0/2b007083f992c1543e73ec9c4113528deeb418502dfee791bb2902c7c2e228d9e46c3ed7415c27f7d03850e34189ee4a8b5c54ef7d262abcfd5eb1848e8ca76e
   languageName: node
   linkType: hard
 
@@ -3162,6 +3222,13 @@ __metadata:
   version: 2.0.5
   resolution: "undefsafe@npm:2.0.5"
   checksum: 10c0/96c0466a5fbf395917974a921d5d4eee67bca4b30d3a31ce7e621e0228c479cf893e783a109af6e14329b52fe2f0cb4108665fad2b87b0018c0df6ac771261d5
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.18.0":
+  version: 7.18.2
+  resolution: "undici-types@npm:7.18.2"
+  checksum: 10c0/85a79189113a238959d7a647368e4f7c5559c3a404ebdb8fc4488145ce9426fcd82252a844a302798dfc0e37e6fb178ff481ed03bc4caf634c5757d9ef43521d
   languageName: node
   linkType: hard
 

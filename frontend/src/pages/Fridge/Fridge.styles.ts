@@ -60,6 +60,24 @@ export const ProductPhoto = styled.img`
   background-color: ${({ theme }) => theme.colors.neutral[100]};
 `
 
+export const ProductPhotoPlaceholder = styled.div`
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  background-color: ${({ theme }) => theme.colors.neutral[100]};
+`
+
+export const CenteredState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 16px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.primary};
+`
+
 export const ProductName = styled.span`
   font-size: 0.875rem;
   font-weight: 500;

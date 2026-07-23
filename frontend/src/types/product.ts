@@ -1,15 +1,3 @@
-export interface Product {
-  id: string
-  name: string
-  photoUrl: string
-  description: string
-  quantityRemaining: number
-  quantityTotal: number
-  category: string
-  expirationDate: string
-  comment: string
-}
-
 export interface ProductNutriments {
   'energy-kcal_100g'?: number
   'energy-kcal_serving'?: number
@@ -21,6 +9,22 @@ export interface ProductNutriments {
   proteins_100g?: number
   salt_100g?: number
   sodium_100g?: number
+}
+
+export interface AddFridgeProductRequest {
+  barcode: string
+  name?: string
+  photoUrl?: string
+  description: string
+  category: string
+  expirationDate: string
+  quantityRemaining: number
+  comment?: string
+}
+
+export interface FridgeProduct extends AddFridgeProductRequest {
+  id: number
+  createdAt: string
 }
 
 /** Respuesta de GET /products/:barcode (backend/src/controllers/product.controller.ts) */

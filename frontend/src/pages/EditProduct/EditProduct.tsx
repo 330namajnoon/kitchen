@@ -43,8 +43,9 @@ const validationSchema = yup.object({
     .typeError('Introduce una cantidad')
     .positive('La cantidad debe ser mayor que 0')
     .required('La cantidad es obligatoria'),
-  quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml']).required(),
+  quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml', 'u']).required(),
   quantityRemaining: yup.number().min(0).max(100).required(),
+  price: yup.number().typeError('Introduce un precio').positive('El precio debe ser mayor que 0').nullable(),
   comment: yup.string(),
   genericProductId: yup.number().nullable().required('Selecciona un producto genérico'),
 })
@@ -56,6 +57,7 @@ interface EditProductFormValues {
   quantityAmount: number | ''
   quantityUnit: QuantityUnit
   quantityRemaining: number
+  price: number | ''
   comment: string
   genericProductId: number | null
 }
@@ -89,6 +91,7 @@ export const EditProduct = () => {
       quantityAmount: product?.quantityAmount ?? '',
       quantityUnit: product?.quantityUnit ?? 'g',
       quantityRemaining: product?.quantityRemaining ?? 100,
+      price: product?.price ?? '',
       comment: product?.comment ?? '',
       genericProductId: product?.genericProductId ?? suggestedGenericProduct?.id ?? null,
     },
@@ -103,6 +106,7 @@ export const EditProduct = () => {
           quantityAmount: Number(values.quantityAmount),
           quantityUnit: values.quantityUnit,
           quantityRemaining: values.quantityRemaining,
+          price: values.price === '' ? undefined : Number(values.price),
           comment: values.comment,
           genericProductId: values.genericProductId ?? undefined,
         }).unwrap()
@@ -288,8 +292,22 @@ export const EditProduct = () => {
           >
             <MenuItem value="g">g</MenuItem>
             <MenuItem value="ml">ml</MenuItem>
+            <MenuItem value="u">u</MenuItem>
           </TextField>
         </QuantityRow>
+
+        <TextField
+          name="price"
+          label="Precio (opcional)"
+          type="number"
+          value={formik.values.price}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.price && Boolean(formik.errors.price)}
+          helperText={formik.touched.price && formik.errors.price}
+          slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+          fullWidth
+        />
 
         <SliderRow>
           <SliderLabel>

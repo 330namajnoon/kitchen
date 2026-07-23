@@ -22,6 +22,7 @@ export const addFridgeProduct = createController(async (req, res) => {
     quantityAmount,
     quantityUnit,
     quantityRemaining,
+    price,
     comment,
     genericProductId,
   } = req.body;
@@ -50,6 +51,7 @@ export const addFridgeProduct = createController(async (req, res) => {
       quantityAmount: Number(quantityAmount),
       quantityUnit,
       quantityRemaining: Number(quantityRemaining),
+      price: price === undefined ? undefined : Number(price),
       comment,
       genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
     });
@@ -88,6 +90,7 @@ export const editFridgeProduct = createController(async (req, res) => {
     quantityAmount,
     quantityUnit,
     quantityRemaining,
+    price,
     comment,
     genericProductId,
   } = req.body;
@@ -103,6 +106,7 @@ export const editFridgeProduct = createController(async (req, res) => {
       quantityAmount: quantityAmount === undefined ? undefined : Number(quantityAmount),
       quantityUnit,
       quantityRemaining: quantityRemaining === undefined ? undefined : Number(quantityRemaining),
+      price: price === undefined ? undefined : Number(price),
       comment,
       genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
     });

@@ -8,8 +8,9 @@ export interface CreateFridgeProductInput {
   category: string;
   expirationDate: string;
   quantityAmount: number;
-  quantityUnit: "g" | "ml";
+  quantityUnit: "g" | "ml" | "u";
   quantityRemaining: number;
+  price?: number;
   comment?: string;
   genericProductId?: number;
 }
@@ -26,6 +27,7 @@ export async function createFridgeProduct(input: CreateFridgeProductInput) {
       quantityAmount: input.quantityAmount,
       quantityUnit: input.quantityUnit,
       quantityRemaining: input.quantityRemaining,
+      price: input.price,
       comment: input.comment,
       genericProductId: input.genericProductId,
     },
@@ -47,8 +49,9 @@ export interface UpdateFridgeProductInput {
   category?: string;
   expirationDate?: string;
   quantityAmount?: number;
-  quantityUnit?: "g" | "ml";
+  quantityUnit?: "g" | "ml" | "u";
   quantityRemaining?: number;
+  price?: number;
   comment?: string;
   genericProductId?: number;
 }
@@ -66,6 +69,7 @@ export async function updateFridgeProduct(id: number, input: UpdateFridgeProduct
       quantityAmount: input.quantityAmount,
       quantityUnit: input.quantityUnit,
       quantityRemaining: input.quantityRemaining,
+      price: input.price,
       comment: input.comment,
       genericProductId: input.genericProductId,
     },

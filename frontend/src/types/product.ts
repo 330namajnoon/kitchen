@@ -13,7 +13,7 @@ export interface ProductNutriments {
 
 import type { GenericProduct } from './genericProduct'
 
-export type QuantityUnit = 'g' | 'ml'
+export type QuantityUnit = 'g' | 'ml' | 'u'
 
 export interface AddFridgeProductRequest {
   barcode: string
@@ -25,6 +25,7 @@ export interface AddFridgeProductRequest {
   quantityAmount: number
   quantityUnit: QuantityUnit
   quantityRemaining: number
+  price?: number
   comment?: string
   genericProductId?: number
 }

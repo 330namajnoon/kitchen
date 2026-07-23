@@ -23,6 +23,7 @@ model User {
 enum QuantityUnit {
   g
   ml
+  u
 }
 
 model FridgeProduct {
@@ -36,6 +37,7 @@ model FridgeProduct {
   quantityAmount    Float?
   quantityUnit      QuantityUnit?
   quantityRemaining Int           @db.TinyInt
+  price             Float?
   comment           String?       @db.VarChar(1000)
   createdAt         DateTime      @default(now())
 

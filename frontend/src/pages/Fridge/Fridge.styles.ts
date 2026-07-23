@@ -41,7 +41,7 @@ export const ProductGrid = styled.div`
   }
 `
 
-export const ProductCard = styled.div`
+export const ProductCard = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -50,6 +50,14 @@ export const ProductCard = styled.div`
   background-color: ${({ theme }) => theme.colors.background.paper};
   border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
   border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+  appearance: none;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary.light};
+  }
 `
 
 export const ProductPhoto = styled.img`

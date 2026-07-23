@@ -27,6 +27,10 @@ export interface FridgeProduct extends AddFridgeProductRequest {
   createdAt: string
 }
 
+export interface UpdateFridgeProductRequest extends Partial<AddFridgeProductRequest> {
+  id: number
+}
+
 /** Respuesta de GET /products/:barcode (backend/src/controllers/product.controller.ts) */
 export interface ProductLookupResponse {
   productName?: string

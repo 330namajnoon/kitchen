@@ -7,7 +7,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener'
 import SpeedDial from '@mui/material/SpeedDial'
 import SpeedDialAction from '@mui/material/SpeedDialAction'
 import { useGetFridgeProductsQuery } from '@/services/fridgeApi'
-import { paths } from '@/routes/paths'
+import { buildEditProductPath, paths } from '@/routes/paths'
 import {
   CenteredState,
   FridgeWrapper,
@@ -46,7 +46,7 @@ export const Fridge = () => {
           {products!.map((product) => {
             const displayName = product.name || product.description
             return (
-              <ProductCard key={product.id}>
+              <ProductCard key={product.id} onClick={() => navigate(buildEditProductPath(product.id), { state: { product } })}>
                 {product.photoUrl ? (
                   <ProductPhoto src={product.photoUrl} alt={displayName} />
                 ) : (

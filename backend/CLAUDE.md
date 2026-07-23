@@ -167,9 +167,27 @@ Modelos actuales:
   es la forma de desacoplar el contrato de la API pública del que consume el frontend. Al añadir
   un campo nuevo de Open Food Facts hay que: 1) añadirlo a la interfaz `Product` en
   `product.service.ts`, 2) mapearlo en `getProduct` (`product.controller.ts`).
-- Todavía no existe ningún endpoint de escritura (crear/guardar producto en una nevera) — el
-  frontend solo consulta este `GET` de lectura; ver el `CLAUDE.md` del frontend para el estado de
-  la pantalla que lo consume (`AddProduct`).
+- Todavía no existe ningún endpoint de escritura para este recurso — es solo lectura, el
+  guardado real de productos vive en `fridge-products` (ver más abajo).
+
+### `fridge-products` — CRUD de la nevera
+
+[src/services/fridge-product.service.ts](src/services/fridge-product.service.ts) →
+[src/controllers/fridge-product.controller.ts](src/controllers/fridge-product.controller.ts) →
+[src/routers/fridge-product.router.ts](src/routers/fridge-product.router.ts).
+
+- Tabla propia `fridge_products` (modelo `FridgeProduct` en `schema.prisma`): `barcode`, `name`,
+  `photoUrl`, `description`, `category`, `expirationDate` (date), `quantityRemaining` (0-100),
+  `comment`, `createdAt`. Sin `updatedAt` y sin scoping por usuario (el `id` es la única PK).
+- `GET /fridge-products` — lista completa, ordenada por `createdAt` desc.
+- `POST /fridge-products` — crea uno nuevo. Valida a mano (`barcode`, `description`, `category`,
+  `expirationDate`, `quantityRemaining` obligatorios) y responde 400 si falta alguno.
+- `PUT /fridge-products/:id` — actualiza campos parciales del producto (usado por la pantalla
+  `EditProduct` del frontend). Responde 400 si `:id` no es un entero, 404 si Prisma no encuentra
+  la fila (`P2025`).
+- `DELETE /fridge-products/:id` — borra el producto (204 sin body). Mismos 400/404 que el `PUT`.
+- Ningún endpoint tiene autenticación ni ownership check — cualquiera con la URL puede editar/borrar
+  cualquier fila.
 
 ## Frontend
 

@@ -31,3 +31,34 @@ export async function getFridgeProducts() {
     orderBy: { createdAt: "desc" },
   });
 }
+
+export interface UpdateFridgeProductInput {
+  barcode?: string;
+  name?: string;
+  photoUrl?: string;
+  description?: string;
+  category?: string;
+  expirationDate?: string;
+  quantityRemaining?: number;
+  comment?: string;
+}
+
+export async function updateFridgeProduct(id: number, input: UpdateFridgeProductInput) {
+  return prisma.fridgeProduct.update({
+    where: { id },
+    data: {
+      barcode: input.barcode,
+      name: input.name,
+      photoUrl: input.photoUrl,
+      description: input.description,
+      category: input.category,
+      expirationDate: input.expirationDate ? new Date(input.expirationDate) : undefined,
+      quantityRemaining: input.quantityRemaining,
+      comment: input.comment,
+    },
+  });
+}
+
+export async function deleteFridgeProduct(id: number) {
+  return prisma.fridgeProduct.delete({ where: { id } });
+}

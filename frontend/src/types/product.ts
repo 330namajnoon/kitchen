@@ -11,6 +11,8 @@ export interface ProductNutriments {
   sodium_100g?: number
 }
 
+export type QuantityUnit = 'g' | 'ml'
+
 export interface AddFridgeProductRequest {
   barcode: string
   name?: string
@@ -18,6 +20,8 @@ export interface AddFridgeProductRequest {
   description: string
   category: string
   expirationDate: string
+  quantityAmount: number
+  quantityUnit: QuantityUnit
   quantityRemaining: number
   comment?: string
 }

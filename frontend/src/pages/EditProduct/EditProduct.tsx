@@ -3,11 +3,12 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
+import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
 import { useDeleteFridgeProductMutation, useGetFridgeProductsQuery, useUpdateFridgeProductMutation } from '@/services/fridgeApi'
 import { paths } from '@/routes/paths'
-import type { FridgeProduct } from '@/types/product'
+import type { FridgeProduct, QuantityUnit } from '@/types/product'
 import {
   ButtonsRow,
   CenteredState,
@@ -18,6 +19,7 @@ import {
   ProductName,
   ProductPhoto,
   ProductPhotoPlaceholder,
+  QuantityRow,
   SectionTitle,
   SliderLabel,
   SliderRow,
@@ -27,6 +29,12 @@ const validationSchema = yup.object({
   description: yup.string().trim().required('La descripción es obligatoria'),
   category: yup.string().trim().required('La categoría es obligatoria'),
   expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
+  quantityAmount: yup
+    .number()
+    .typeError('Introduce una cantidad')
+    .positive('La cantidad debe ser mayor que 0')
+    .required('La cantidad es obligatoria'),
+  quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml']).required(),
   quantityRemaining: yup.number().min(0).max(100).required(),
   comment: yup.string(),
 })
@@ -35,6 +43,8 @@ interface EditProductFormValues {
   description: string
   category: string
   expirationDate: string
+  quantityAmount: number | ''
+  quantityUnit: QuantityUnit
   quantityRemaining: number
   comment: string
 }
@@ -60,6 +70,8 @@ export const EditProduct = () => {
       description: product?.description ?? '',
       category: product?.category ?? '',
       expirationDate: product ? toDateInputValue(product.expirationDate) : '',
+      quantityAmount: product?.quantityAmount ?? '',
+      quantityUnit: product?.quantityUnit ?? 'g',
       quantityRemaining: product?.quantityRemaining ?? 100,
       comment: product?.comment ?? '',
     },
@@ -71,6 +83,8 @@ export const EditProduct = () => {
           description: values.description,
           category: values.category,
           expirationDate: values.expirationDate,
+          quantityAmount: Number(values.quantityAmount),
+          quantityUnit: values.quantityUnit,
           quantityRemaining: values.quantityRemaining,
           comment: values.comment,
         }).unwrap()
@@ -179,6 +193,31 @@ export const EditProduct = () => {
           slotProps={{ inputLabel: { shrink: true } }}
           fullWidth
         />
+
+        <QuantityRow>
+          <TextField
+            name="quantityAmount"
+            label="Cantidad total"
+            type="number"
+            value={formik.values.quantityAmount}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.quantityAmount && Boolean(formik.errors.quantityAmount)}
+            helperText={formik.touched.quantityAmount && formik.errors.quantityAmount}
+            slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+            fullWidth
+          />
+          <TextField
+            name="quantityUnit"
+            label="Unidad"
+            select
+            value={formik.values.quantityUnit}
+            onChange={formik.handleChange}
+          >
+            <MenuItem value="g">g</MenuItem>
+            <MenuItem value="ml">ml</MenuItem>
+          </TextField>
+        </QuantityRow>
 
         <SliderRow>
           <SliderLabel>

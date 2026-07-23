@@ -4,11 +4,13 @@ import * as yup from 'yup'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
+import MenuItem from '@mui/material/MenuItem'
 import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
 import { useGetProductByCodeQuery } from '@/services/productsApi'
 import { useAddFridgeProductMutation } from '@/services/fridgeApi'
 import { paths } from '@/routes/paths'
+import type { QuantityUnit } from '@/types/product'
 import {
   AddProductWrapper,
   CenteredState,
@@ -20,6 +22,7 @@ import {
   ProductName,
   ProductPhoto,
   ProductPhotoPlaceholder,
+  QuantityRow,
   SectionTitle,
   SliderLabel,
   SliderRow,
@@ -31,10 +34,31 @@ const formatTag = (tag: string) => {
   return withoutPrefix.replace(/-/g, ' ')
 }
 
+/** Parsea el "quantity" de Open Food Facts (ej. "500 g", "1 l", "750ml") a cantidad + unidad g/ml. */
+const parseOffQuantity = (quantity: string): { amount: number; unit: QuantityUnit } | null => {
+  const match = quantity.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|l|cl|ml)\b/i)
+  if (!match) return null
+
+  const value = Number(match[1].replace(',', '.'))
+  if (!Number.isFinite(value) || value <= 0) return null
+
+  const rawUnit = match[2].toLowerCase()
+  if (rawUnit === 'kg') return { amount: value * 1000, unit: 'g' }
+  if (rawUnit === 'l') return { amount: value * 1000, unit: 'ml' }
+  if (rawUnit === 'cl') return { amount: value * 10, unit: 'ml' }
+  return { amount: value, unit: rawUnit as QuantityUnit }
+}
+
 const validationSchema = yup.object({
   description: yup.string().trim().required('La descripción es obligatoria'),
   category: yup.string().trim().required('La categoría es obligatoria'),
   expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
+  quantityAmount: yup
+    .number()
+    .typeError('Introduce una cantidad')
+    .positive('La cantidad debe ser mayor que 0')
+    .required('La cantidad es obligatoria'),
+  quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml']).required(),
   quantityRemaining: yup.number().min(0).max(100).required(),
   comment: yup.string(),
 })
@@ -43,6 +67,8 @@ interface AddProductFormValues {
   description: string
   category: string
   expirationDate: string
+  quantityAmount: number | ''
+  quantityUnit: QuantityUnit
   quantityRemaining: number
   comment: string
 }
@@ -55,6 +81,7 @@ export const AddProduct = () => {
 
   const suggestedDescription = data?.productGenericNameEs ?? data?.productGenericName ?? ''
   const suggestedCategory = data?.productCategories?.[0] ? formatTag(data.productCategories[0]) : ''
+  const suggestedQuantity = data?.productQuantity ? parseOffQuantity(data.productQuantity) : null
 
   const formik = useFormik<AddProductFormValues>({
     enableReinitialize: true,
@@ -62,6 +89,8 @@ export const AddProduct = () => {
       description: suggestedDescription,
       category: suggestedCategory,
       expirationDate: '',
+      quantityAmount: suggestedQuantity?.amount ?? '',
+      quantityUnit: suggestedQuantity?.unit ?? 'g',
       quantityRemaining: 100,
       comment: '',
     },
@@ -75,6 +104,8 @@ export const AddProduct = () => {
           description: values.description,
           category: values.category,
           expirationDate: values.expirationDate,
+          quantityAmount: Number(values.quantityAmount),
+          quantityUnit: values.quantityUnit,
           quantityRemaining: values.quantityRemaining,
           comment: values.comment,
         }).unwrap()
@@ -195,6 +226,31 @@ export const AddProduct = () => {
           slotProps={{ inputLabel: { shrink: true } }}
           fullWidth
         />
+
+        <QuantityRow>
+          <TextField
+            name="quantityAmount"
+            label="Cantidad total"
+            type="number"
+            value={formik.values.quantityAmount}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.quantityAmount && Boolean(formik.errors.quantityAmount)}
+            helperText={formik.touched.quantityAmount && formik.errors.quantityAmount}
+            slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+            fullWidth
+          />
+          <TextField
+            name="quantityUnit"
+            label="Unidad"
+            select
+            value={formik.values.quantityUnit}
+            onChange={formik.handleChange}
+          >
+            <MenuItem value="g">g</MenuItem>
+            <MenuItem value="ml">ml</MenuItem>
+          </TextField>
+        </QuantityRow>
 
         <SliderRow>
           <SliderLabel>

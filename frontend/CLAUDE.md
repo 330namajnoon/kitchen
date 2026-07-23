@@ -179,12 +179,16 @@ yarn preview   # sirve el build de producción localmente
     (`useGetProductByCodeQuery`, vía `productsApi`) y pinta los datos de Open Food Facts
     (nombre, foto, marca, Nutri-Score/Eco-Score/Nova, alérgenos) junto a un formulario con los
     campos que Open Food Facts no provee y hay que rellenar a mano (descripción, categoría,
-    fecha de caducidad, cantidad restante %, comentario). El submit llama a
+    fecha de caducidad, cantidad total del envase + unidad g/ml, cantidad restante %, comentario).
+    La cantidad total (`quantityAmount`/`quantityUnit`) se intenta pre-rellenar parseando el
+    string libre `productQuantity` de Open Food Facts (ej. "500 g", "1 l") con `parseOffQuantity`
+    en `AddProduct.tsx`; si no se puede parsear, el usuario la introduce a mano. Es el total del
+    envase, no confundir con la cantidad restante % (slider). El submit llama a
     `useAddFridgeProductMutation` (`POST /fridge-products`) y redirige a `Fridge`.
   - `EditProduct` (`/nevera/:id/editar`) — mismo formulario que `AddProduct` (descripción,
-    categoría, fecha de caducidad, cantidad restante %, comentario) pero para un producto ya
-    guardado: lee el producto de `location.state` si viene de tocar una tarjeta en `Fridge`, o
-    si no (ej. recarga directa de la URL) lo busca por `id` dentro de
+    categoría, fecha de caducidad, cantidad total + unidad g/ml, cantidad restante %, comentario)
+    pero para un producto ya guardado: lee el producto de `location.state` si viene de tocar una
+    tarjeta en `Fridge`, o si no (ej. recarga directa de la URL) lo busca por `id` dentro de
     `useGetFridgeProductsQuery()`. Tiene botón "Guardar" (`useUpdateFridgeProductMutation`,
     `PUT /fridge-products/:id`) y botón "Borrar producto" (`useDeleteFridgeProductMutation`,
     `DELETE /fridge-products/:id`, con `window.confirm` antes de borrar). Ambos redirigen a

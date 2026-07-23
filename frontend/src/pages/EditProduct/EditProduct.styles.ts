@@ -91,6 +91,21 @@ export const Form = styled.form`
   margin: 0 auto;
 `
 
+export const QuantityRow = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  > :first-child {
+    flex: 1;
+  }
+
+  > :last-child {
+    width: 90px;
+    flex-shrink: 0;
+  }
+`
+
 export const SliderRow = styled.div`
   display: flex;
   flex-direction: column;

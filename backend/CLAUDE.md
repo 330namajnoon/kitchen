@@ -177,8 +177,11 @@ Modelos actuales:
 [src/routers/fridge-product.router.ts](src/routers/fridge-product.router.ts).
 
 - Tabla propia `fridge_products` (modelo `FridgeProduct` en `schema.prisma`): `barcode`, `name`,
-  `photoUrl`, `description`, `category`, `expirationDate` (date), `quantityRemaining` (0-100),
-  `comment`, `createdAt`. Sin `updatedAt` y sin scoping por usuario (el `id` es la única PK).
+  `photoUrl`, `description`, `category`, `expirationDate` (date), `quantityAmount` (cantidad total
+  del envase, nullable por filas anteriores a este campo), `quantityUnit` (enum `g`/`ml`, nullable
+  por el mismo motivo), `quantityRemaining` (0-100, % restante — no confundir con `quantityAmount`,
+  que es el total del envase, no lo que queda), `comment`, `createdAt`. Sin `updatedAt` y sin
+  scoping por usuario (el `id` es la única PK).
 - `GET /fridge-products` — lista completa, ordenada por `createdAt` desc.
 - `POST /fridge-products` — crea uno nuevo. Valida a mano (`barcode`, `description`, `category`,
   `expirationDate`, `quantityRemaining` obligatorios) y responde 400 si falta alguno.

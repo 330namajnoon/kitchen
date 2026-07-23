@@ -12,9 +12,28 @@ const isNotFoundError = (error: unknown) =>
   typeof error === "object" && error !== null && "code" in error && (error as { code: unknown }).code === "P2025";
 
 export const addFridgeProduct = createController(async (req, res) => {
-  const { barcode, name, photoUrl, description, category, expirationDate, quantityRemaining, comment } = req.body;
+  const {
+    barcode,
+    name,
+    photoUrl,
+    description,
+    category,
+    expirationDate,
+    quantityAmount,
+    quantityUnit,
+    quantityRemaining,
+    comment,
+  } = req.body;
 
-  if (!barcode || !description || !category || !expirationDate || quantityRemaining === undefined) {
+  if (
+    !barcode ||
+    !description ||
+    !category ||
+    !expirationDate ||
+    quantityAmount === undefined ||
+    !quantityUnit ||
+    quantityRemaining === undefined
+  ) {
     res.status(400).json({ error: "Faltan campos obligatorios" });
     return;
   }
@@ -27,6 +46,8 @@ export const addFridgeProduct = createController(async (req, res) => {
       description,
       category,
       expirationDate,
+      quantityAmount: Number(quantityAmount),
+      quantityUnit,
       quantityRemaining: Number(quantityRemaining),
       comment,
     });
@@ -55,7 +76,18 @@ export const editFridgeProduct = createController(async (req, res) => {
     return;
   }
 
-  const { barcode, name, photoUrl, description, category, expirationDate, quantityRemaining, comment } = req.body;
+  const {
+    barcode,
+    name,
+    photoUrl,
+    description,
+    category,
+    expirationDate,
+    quantityAmount,
+    quantityUnit,
+    quantityRemaining,
+    comment,
+  } = req.body;
 
   try {
     const product = await updateFridgeProduct(id, {
@@ -65,6 +97,8 @@ export const editFridgeProduct = createController(async (req, res) => {
       description,
       category,
       expirationDate,
+      quantityAmount: quantityAmount === undefined ? undefined : Number(quantityAmount),
+      quantityUnit,
       quantityRemaining: quantityRemaining === undefined ? undefined : Number(quantityRemaining),
       comment,
     });

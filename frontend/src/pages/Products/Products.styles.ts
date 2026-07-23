@@ -22,6 +22,11 @@ export const PageTitle = styled.h1`
   }
 `
 
+export const SearchField = styled.div`
+  margin-bottom: 20px;
+  max-width: 480px;
+`
+
 export const ProductGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -41,7 +46,7 @@ export const ProductGrid = styled.div`
   }
 `
 
-export const ProductCard = styled.button`
+export const ProductCard = styled.button<{ $depleted?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -58,6 +63,13 @@ export const ProductCard = styled.button`
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary.light};
   }
+
+  ${({ $depleted, theme }) =>
+    $depleted &&
+    `
+    opacity: 0.6;
+    border-color: ${theme.colors.error.main};
+  `}
 `
 
 export const ProductPhoto = styled.img`
@@ -91,4 +103,10 @@ export const ProductName = styled.span`
   font-weight: 500;
   color: ${({ theme }) => theme.colors.text.primary};
   text-align: center;
+`
+
+export const ProductQuantityRemaining = styled.span<{ $depleted?: boolean }>`
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${({ theme, $depleted }) => ($depleted ? theme.colors.error.main : theme.colors.text.secondary)};
 `

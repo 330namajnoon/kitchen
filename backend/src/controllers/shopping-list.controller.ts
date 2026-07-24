@@ -25,7 +25,7 @@ const parseItems = (input: unknown): ShoppingListItemInput[] | null => {
     if (
       genericProductId === undefined ||
       quantityAmount === undefined ||
-      !["g", "ml", "u"].includes(quantityUnit as string)
+      !["g", "ml", "u", "tsp", "tbsp", "pinch", "cup"].includes(quantityUnit as string)
     ) {
       return null;
     }
@@ -33,7 +33,7 @@ const parseItems = (input: unknown): ShoppingListItemInput[] | null => {
     items.push({
       genericProductId: Number(genericProductId),
       quantityAmount: Number(quantityAmount),
-      quantityUnit: quantityUnit as "g" | "ml" | "u",
+      quantityUnit: quantityUnit as "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup",
     });
   }
 

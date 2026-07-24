@@ -157,16 +157,3 @@ export const GenericProductRow = styled.div`
     flex: 1;
   }
 `
-
-export const SliderRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`
-
-export const SliderLabel = styled.div`
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-`

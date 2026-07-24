@@ -46,7 +46,7 @@ export const ProductGrid = styled.div`
   }
 `
 
-export const ProductCard = styled.button<{ $depleted?: boolean }>`
+export const ProductCard = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -63,13 +63,6 @@ export const ProductCard = styled.button<{ $depleted?: boolean }>`
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary.light};
   }
-
-  ${({ $depleted, theme }) =>
-    $depleted &&
-    `
-    opacity: 0.6;
-    border-color: ${theme.colors.error.main};
-  `}
 `
 
 export const ProductPhoto = styled.img`
@@ -105,8 +98,3 @@ export const ProductName = styled.span`
   text-align: center;
 `
 
-export const ProductQuantityRemaining = styled.span<{ $depleted?: boolean }>`
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: ${({ theme, $depleted }) => ($depleted ? theme.colors.error.main : theme.colors.text.secondary)};
-`

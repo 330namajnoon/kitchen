@@ -21,7 +21,6 @@ export const addProduct = createController(async (req, res) => {
     expirationDate,
     quantityAmount,
     quantityUnit,
-    quantityRemaining,
     price,
     comment,
     genericProductId,
@@ -33,8 +32,7 @@ export const addProduct = createController(async (req, res) => {
     !category ||
     !expirationDate ||
     quantityAmount === undefined ||
-    !quantityUnit ||
-    quantityRemaining === undefined
+    !quantityUnit
   ) {
     res.status(400).json({ error: "Faltan campos obligatorios" });
     return;
@@ -50,7 +48,6 @@ export const addProduct = createController(async (req, res) => {
       expirationDate,
       quantityAmount: Number(quantityAmount),
       quantityUnit,
-      quantityRemaining: Number(quantityRemaining),
       price: price === undefined ? undefined : Number(price),
       comment,
       genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),
@@ -89,7 +86,6 @@ export const editProduct = createController(async (req, res) => {
     expirationDate,
     quantityAmount,
     quantityUnit,
-    quantityRemaining,
     price,
     comment,
     genericProductId,
@@ -105,7 +101,6 @@ export const editProduct = createController(async (req, res) => {
       expirationDate,
       quantityAmount: quantityAmount === undefined ? undefined : Number(quantityAmount),
       quantityUnit,
-      quantityRemaining: quantityRemaining === undefined ? undefined : Number(quantityRemaining),
       price: price === undefined ? undefined : Number(price),
       comment,
       genericProductId: genericProductId === undefined ? undefined : Number(genericProductId),

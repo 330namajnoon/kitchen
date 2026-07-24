@@ -3,7 +3,7 @@ import { prisma } from "@/config/prisma";
 export interface RecipeIngredientInput {
   genericProductId: number;
   quantityAmount: number;
-  quantityUnit: "g" | "ml" | "u";
+  quantityUnit: "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup";
 }
 
 export interface CreateRecipeInput {

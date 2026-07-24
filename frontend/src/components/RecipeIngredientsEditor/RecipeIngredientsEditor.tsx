@@ -123,6 +123,10 @@ export const RecipeIngredientsEditor = ({
                   <MenuItem value="g">g</MenuItem>
                   <MenuItem value="ml">ml</MenuItem>
                   <MenuItem value="u">u</MenuItem>
+                  <MenuItem value="tsp">tsp</MenuItem>
+                  <MenuItem value="tbsp">tbsp</MenuItem>
+                  <MenuItem value="pinch">pinch</MenuItem>
+                  <MenuItem value="cup">cup</MenuItem>
                 </TextField>
                 <IconButton aria-label="Quitar ingrediente" onClick={() => handleRemove(ingredient.genericProductId)}>
                   <Delete />

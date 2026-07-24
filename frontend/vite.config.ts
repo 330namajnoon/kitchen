@@ -5,11 +5,11 @@ import path from 'node:path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/mac-kitchen-public/',
+  base: '/kitchen/',
   server: {
     host: '0.0.0.0', // o true
     port: 5174,
-    allowedHosts: ["sinul.es"],
+    allowedHosts: ['sinul.es', 'www.sinul.es'],
     hmr: {
       protocol: 'wss',
       clientPort: 443,

@@ -18,7 +18,6 @@ import {
   ProductName,
   ProductPhoto,
   ProductPhotoPlaceholder,
-  ProductQuantityRemaining,
   ProductsWrapper,
   SearchField,
 } from './Products.styles'
@@ -73,11 +72,9 @@ export const Products = () => {
         <ProductGrid>
           {filteredProducts!.map((product) => {
             const displayName = product.name || product.description
-            const isDepleted = product.quantityRemaining <= 0
             return (
               <ProductCard
                 key={product.id}
-                $depleted={isDepleted}
                 onClick={() => navigate(buildEditProductPath(product.id), { state: { product } })}
               >
                 {product.photoUrl ? (
@@ -86,9 +83,6 @@ export const Products = () => {
                   <ProductPhotoPlaceholder />
                 )}
                 <ProductName>{displayName}</ProductName>
-                <ProductQuantityRemaining $depleted={isDepleted}>
-                  {product.quantityRemaining}%
-                </ProductQuantityRemaining>
               </ProductCard>
             )
           })}

@@ -24,7 +24,7 @@ const parseIngredients = (input: unknown): RecipeIngredientInput[] | null => {
     if (
       genericProductId === undefined ||
       quantityAmount === undefined ||
-      !["g", "ml", "u"].includes(quantityUnit as string)
+      !["g", "ml", "u", "tsp", "tbsp", "pinch", "cup"].includes(quantityUnit as string)
     ) {
       return null;
     }
@@ -32,7 +32,7 @@ const parseIngredients = (input: unknown): RecipeIngredientInput[] | null => {
     ingredients.push({
       genericProductId: Number(genericProductId),
       quantityAmount: Number(quantityAmount),
-      quantityUnit: quantityUnit as "g" | "ml" | "u",
+      quantityUnit: quantityUnit as "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup",
     });
   }
 

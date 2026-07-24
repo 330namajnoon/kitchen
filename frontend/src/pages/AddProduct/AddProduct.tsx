@@ -11,7 +11,6 @@ import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
-import Slider from '@mui/material/Slider'
 import TextField from '@mui/material/TextField'
 import { useGetProductByCodeQuery } from '@/services/productLookupApi'
 import { useAddProductMutation, useUploadProductPhotoMutation } from '@/services/productsApi'
@@ -35,8 +34,6 @@ import {
   ProductPhotoPlaceholder,
   QuantityRow,
   SectionTitle,
-  SliderLabel,
-  SliderRow,
 } from './AddProduct.styles'
 
 const DRAFT_STORAGE_KEY = 'kitchen:addProductDraft'
@@ -74,8 +71,7 @@ const validationSchema = yup.object({
     .typeError('Introduce una cantidad')
     .positive('La cantidad debe ser mayor que 0')
     .required('La cantidad es obligatoria'),
-  quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml', 'u']).required(),
-  quantityRemaining: yup.number().min(0).max(100).required(),
+  quantityUnit: yup.mixed<QuantityUnit>().oneOf(['g', 'ml', 'u', 'tsp', 'tbsp', 'pinch', 'cup']).required(),
   price: yup.number().typeError('Introduce un precio').positive('El precio debe ser mayor que 0').nullable(),
   comment: yup.string(),
   genericProductId: yup.number().nullable().required('Selecciona un producto genérico'),
@@ -89,7 +85,6 @@ interface AddProductFormValues {
   expirationDate: string
   quantityAmount: number | ''
   quantityUnit: QuantityUnit
-  quantityRemaining: number
   price: number | ''
   comment: string
   genericProductId: number | null
@@ -141,7 +136,6 @@ export const AddProduct = () => {
       expirationDate: '',
       quantityAmount: suggestedQuantity?.amount ?? '',
       quantityUnit: suggestedQuantity?.unit ?? 'g',
-      quantityRemaining: 100,
       price: '',
       comment: '',
       genericProductId: suggestedGenericProduct?.id ?? null,
@@ -158,7 +152,6 @@ export const AddProduct = () => {
           expirationDate: values.expirationDate,
           quantityAmount: Number(values.quantityAmount),
           quantityUnit: values.quantityUnit,
-          quantityRemaining: values.quantityRemaining,
           price: values.price === '' ? undefined : Number(values.price),
           comment: values.comment,
           genericProductId: values.genericProductId ?? undefined,
@@ -394,6 +387,10 @@ export const AddProduct = () => {
             <MenuItem value="g">g</MenuItem>
             <MenuItem value="ml">ml</MenuItem>
             <MenuItem value="u">u</MenuItem>
+            <MenuItem value="tsp">tsp</MenuItem>
+            <MenuItem value="tbsp">tbsp</MenuItem>
+            <MenuItem value="pinch">pinch</MenuItem>
+            <MenuItem value="cup">cup</MenuItem>
           </TextField>
         </QuantityRow>
 
@@ -409,20 +406,6 @@ export const AddProduct = () => {
           slotProps={{ htmlInput: { min: 0, step: 'any' } }}
           fullWidth
         />
-
-        <SliderRow>
-          <SliderLabel>
-            <span>Cantidad restante</span>
-            <span>{formik.values.quantityRemaining}%</span>
-          </SliderLabel>
-          <Slider
-            value={formik.values.quantityRemaining}
-            onChange={(_event, value) => formik.setFieldValue('quantityRemaining', value)}
-            min={0}
-            max={100}
-            step={5}
-          />
-        </SliderRow>
 
         <TextField
           name="comment"

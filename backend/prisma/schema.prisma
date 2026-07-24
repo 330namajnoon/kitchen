@@ -24,6 +24,10 @@ enum QuantityUnit {
   g
   ml
   u
+  tsp
+  tbsp
+  pinch
+  cup
 }
 
 enum ShoppingListStatus {
@@ -41,7 +45,6 @@ model Product {
   expirationDate    DateTime      @db.Date
   quantityAmount    Float?
   quantityUnit      QuantityUnit?
-  quantityRemaining Int           @db.TinyInt
   price             Float?
   comment           String?       @db.VarChar(1000)
   createdAt         DateTime      @default(now())

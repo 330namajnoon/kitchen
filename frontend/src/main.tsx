@@ -19,7 +19,7 @@ createRoot(document.getElementById('root')!).render(
         <StyledThemeProvider theme={styledTheme}>
           <CssBaseline />
           <GlobalStyle />
-          <BrowserRouter basename="/mac-kitchen-public">
+          <BrowserRouter basename="/kitchen">
             <App />
           </BrowserRouter>
         </StyledThemeProvider>

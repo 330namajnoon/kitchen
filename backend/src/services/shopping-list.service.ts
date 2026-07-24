@@ -3,7 +3,7 @@ import { prisma } from "@/config/prisma";
 export interface ShoppingListItemInput {
   genericProductId: number;
   quantityAmount: number;
-  quantityUnit: "g" | "ml" | "u";
+  quantityUnit: "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup";
 }
 
 export type ShoppingListStatus = "pending" | "completed";

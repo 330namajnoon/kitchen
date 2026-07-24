@@ -8,8 +8,7 @@ export interface CreateProductInput {
   category: string;
   expirationDate: string;
   quantityAmount: number;
-  quantityUnit: "g" | "ml" | "u";
-  quantityRemaining: number;
+  quantityUnit: "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup";
   price?: number;
   comment?: string;
   genericProductId?: number;
@@ -26,7 +25,6 @@ export async function createProduct(input: CreateProductInput) {
       expirationDate: new Date(input.expirationDate),
       quantityAmount: input.quantityAmount,
       quantityUnit: input.quantityUnit,
-      quantityRemaining: input.quantityRemaining,
       price: input.price,
       comment: input.comment,
       genericProductId: input.genericProductId,
@@ -49,8 +47,7 @@ export interface UpdateProductInput {
   category?: string;
   expirationDate?: string;
   quantityAmount?: number;
-  quantityUnit?: "g" | "ml" | "u";
-  quantityRemaining?: number;
+  quantityUnit?: "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup";
   price?: number;
   comment?: string;
   genericProductId?: number;
@@ -68,7 +65,6 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
       expirationDate: input.expirationDate ? new Date(input.expirationDate) : undefined,
       quantityAmount: input.quantityAmount,
       quantityUnit: input.quantityUnit,
-      quantityRemaining: input.quantityRemaining,
       price: input.price,
       comment: input.comment,
       genericProductId: input.genericProductId,

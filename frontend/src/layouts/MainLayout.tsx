@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
 import KitchenIcon from '@mui/icons-material/Kitchen'
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
@@ -48,6 +49,9 @@ export const MainLayout = () => {
           </NavLink>
           <NavLink as={Link} to={paths.shoppingLists}>
             Listas de la compra
+          </NavLink>
+          <NavLink as={Link} to={paths.availableProducts}>
+            Disponibles
           </NavLink>
         </Nav>
         <MenuButton type="button" aria-label="Abrir menú" onClick={() => setMenuOpen(true)}>
@@ -106,6 +110,14 @@ export const MainLayout = () => {
         >
           <ShoppingCartIcon fontSize="small" />
           Compra
+        </BottomNavLink>
+        <BottomNavLink
+          as={Link}
+          to={paths.availableProducts}
+          $active={pathname.startsWith(paths.availableProducts) || pathname.startsWith(paths.purchase)}
+        >
+          <Inventory2Icon fontSize="small" />
+          Disponibles
         </BottomNavLink>
       </BottomNav>
     </LayoutWrapper>

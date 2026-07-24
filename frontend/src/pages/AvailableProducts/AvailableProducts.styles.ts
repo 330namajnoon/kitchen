@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { media } from '@/styles/breakpoints'
 
-export const ProductsWrapper = styled.div`
+export const AvailableProductsWrapper = styled.div`
   flex: 1;
   position: relative;
   padding: 24px 16px 96px;
@@ -46,7 +46,7 @@ export const ProductGrid = styled.div`
   }
 `
 
-export const ProductCard = styled.button<{ $selected?: boolean }>`
+export const ProductCard = styled.button<{ $depleted?: boolean; $selected?: boolean }>`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -54,7 +54,9 @@ export const ProductCard = styled.button<{ $selected?: boolean }>`
   gap: 8px;
   padding: 12px;
   background-color: ${({ theme, $selected }) => ($selected ? theme.colors.primary.lightest : theme.colors.background.paper)};
-  border: 1px solid ${({ theme, $selected }) => ($selected ? theme.colors.primary.main : theme.colors.neutral[200])};
+  border: 1px solid
+    ${({ theme, $depleted, $selected }) =>
+      $depleted ? theme.colors.error.main : $selected ? theme.colors.primary.main : theme.colors.neutral[200]};
   border-radius: 12px;
   cursor: pointer;
   font: inherit;
@@ -64,7 +66,7 @@ export const ProductCard = styled.button<{ $selected?: boolean }>`
   -webkit-touch-callout: none;
 
   &:hover {
-    border-color: ${({ theme }) => theme.colors.primary.light};
+    border-color: ${({ theme, $depleted }) => ($depleted ? theme.colors.error.main : theme.colors.primary.light)};
   }
 `
 
@@ -109,6 +111,19 @@ export const ProductPhotoPlaceholder = styled.div`
   background-color: ${({ theme }) => theme.colors.neutral[100]};
 `
 
+export const ProductName = styled.span`
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-align: center;
+`
+
+export const ProductPercentage = styled.span<{ $depleted?: boolean }>`
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${({ theme, $depleted }) => ($depleted ? theme.colors.error.main : theme.colors.text.secondary)};
+`
+
 export const CenteredState = styled.div`
   display: flex;
   flex-direction: column;
@@ -119,11 +134,3 @@ export const CenteredState = styled.div`
   text-align: center;
   color: ${({ theme }) => theme.colors.text.primary};
 `
-
-export const ProductName = styled.span`
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.text.primary};
-  text-align: center;
-`
-

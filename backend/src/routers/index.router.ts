@@ -1,5 +1,6 @@
 import type { RouterDefinition } from "sm-express-server";
 
+import { availableProductRouter } from "@/routers/available-product.router";
 import { genericProductRouter } from "@/routers/generic-product.router";
 import { healthRouter } from "@/routers/health.router";
 import { productRouter } from "@/routers/product.router";
@@ -16,4 +17,5 @@ export const routers: RouterDefinition[] = [
   genericProductRouter,
   recipeRouter,
   shoppingListRouter,
+  availableProductRouter,
 ];

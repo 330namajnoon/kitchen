@@ -1,0 +1,1 @@
+export { AvailableProductDetail } from './AvailableProductDetail'

@@ -66,7 +66,6 @@ const validationSchema = yup.object({
   photoUrl: yup.string(),
   description: yup.string().trim().required('La descripción es obligatoria'),
   category: yup.string().trim().required('La categoría es obligatoria'),
-  expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
   quantityAmount: yup
     .number()
     .typeError('Introduce una cantidad')
@@ -83,7 +82,6 @@ interface AddProductFormValues {
   photoUrl: string
   description: string
   category: string
-  expirationDate: string
   quantityAmount: number | ''
   quantityUnit: QuantityUnit
   price: number | ''
@@ -148,7 +146,6 @@ export const AddProduct = () => {
       photoUrl: data?.productImageFrontUrl ?? data?.productImage ?? '',
       description: suggestedDescription,
       category: suggestedCategory,
-      expirationDate: '',
       quantityAmount: suggestedQuantity?.amount ?? '',
       quantityUnit: suggestedQuantity?.unit ?? 'g',
       price: '',
@@ -164,7 +161,6 @@ export const AddProduct = () => {
           photoUrl: values.photoUrl || undefined,
           description: values.description,
           category: values.category,
-          expirationDate: values.expirationDate,
           quantityAmount: Number(values.quantityAmount),
           quantityUnit: values.quantityUnit,
           price: values.price === '' ? undefined : Number(values.price),
@@ -366,19 +362,6 @@ export const AddProduct = () => {
           onBlur={formik.handleBlur}
           error={formik.touched.category && Boolean(formik.errors.category)}
           helperText={formik.touched.category && formik.errors.category}
-          fullWidth
-        />
-
-        <TextField
-          name="expirationDate"
-          label="Fecha de caducidad"
-          type="date"
-          value={formik.values.expirationDate}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.expirationDate && Boolean(formik.errors.expirationDate)}
-          helperText={formik.touched.expirationDate && formik.errors.expirationDate}
-          slotProps={{ inputLabel: { shrink: true } }}
           fullWidth
         />
 

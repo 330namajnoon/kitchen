@@ -6,7 +6,6 @@ export interface CreateProductInput {
   photoUrl?: string;
   description: string;
   category: string;
-  expirationDate: string;
   quantityAmount: number;
   quantityUnit: "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup";
   price?: number;
@@ -22,7 +21,6 @@ export async function createProduct(input: CreateProductInput) {
       photoUrl: input.photoUrl,
       description: input.description,
       category: input.category,
-      expirationDate: new Date(input.expirationDate),
       quantityAmount: input.quantityAmount,
       quantityUnit: input.quantityUnit,
       price: input.price,
@@ -45,7 +43,6 @@ export interface UpdateProductInput {
   photoUrl?: string;
   description?: string;
   category?: string;
-  expirationDate?: string;
   quantityAmount?: number;
   quantityUnit?: "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup";
   price?: number;
@@ -62,7 +59,6 @@ export async function updateProduct(id: number, input: UpdateProductInput) {
       photoUrl: input.photoUrl,
       description: input.description,
       category: input.category,
-      expirationDate: input.expirationDate ? new Date(input.expirationDate) : undefined,
       quantityAmount: input.quantityAmount,
       quantityUnit: input.quantityUnit,
       price: input.price,

@@ -10,11 +10,11 @@ import { useGetProductsQuery } from '@/services/productsApi'
 import { paths } from '@/routes/paths'
 import {
   EmptyState,
+  ItemFieldsColumn,
   ItemList,
   ItemName,
   ItemPhoto,
   ItemPhotoPlaceholder,
-  ItemQuantityField,
   ItemRow,
   PageTitle,
   PurchaseWrapper,
@@ -26,7 +26,25 @@ import {
 interface PurchaseItem {
   productId: number
   quantity: number
+  expirationDate: string
 }
+
+interface ExpirationDateInputProps {
+  expirationDate: string
+  onChange: (expirationDate: string) => void
+}
+
+const ExpirationDateInput = ({ expirationDate, onChange }: ExpirationDateInputProps) => (
+  <TextField
+    type="date"
+    size="small"
+    label="Caducidad (opcional)"
+    value={expirationDate}
+    onChange={(event) => onChange(event.target.value)}
+    slotProps={{ inputLabel: { shrink: true } }}
+    fullWidth
+  />
+)
 
 interface QuantityInputProps {
   quantity: number
@@ -74,7 +92,7 @@ export const Purchase = () => {
   const [searchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [items, setItems] = useState<PurchaseItem[]>(() =>
-    parseProductIds(searchParams.get('productIds')).map((productId) => ({ productId, quantity: 1 })),
+    parseProductIds(searchParams.get('productIds')).map((productId) => ({ productId, quantity: 1, expirationDate: '' })),
   )
   const { data: products } = useGetProductsQuery()
   const [addAvailableProducts, { isLoading: isSaving }] = useAddAvailableProductsMutation()
@@ -88,7 +106,7 @@ export const Purchase = () => {
       : []
 
   const handleAddProduct = (productId: number) => {
-    setItems((current) => [...current, { productId, quantity: 1 }])
+    setItems((current) => [...current, { productId, quantity: 1, expirationDate: '' }])
     setSearch('')
   }
 
@@ -100,9 +118,19 @@ export const Purchase = () => {
     setItems((current) => current.map((item) => (item.productId === productId ? { ...item, quantity } : item)))
   }
 
+  const handleExpirationDateChange = (productId: number, expirationDate: string) => {
+    setItems((current) => current.map((item) => (item.productId === productId ? { ...item, expirationDate } : item)))
+  }
+
   const handlePurchase = async () => {
     try {
-      await addAvailableProducts({ items }).unwrap()
+      await addAvailableProducts({
+        items: items.map(({ productId, quantity, expirationDate }) => ({
+          productId,
+          quantity,
+          expirationDate: expirationDate || undefined,
+        })),
+      }).unwrap()
       navigate(paths.availableProducts)
     } catch {
       // el error se muestra debajo del formulario
@@ -149,12 +177,16 @@ export const Purchase = () => {
               <ItemRow key={item.productId}>
                 {product?.photoUrl ? <ItemPhoto src={product.photoUrl} alt={displayName} /> : <ItemPhotoPlaceholder />}
                 <ItemName>{displayName}</ItemName>
-                <ItemQuantityField>
+                <ItemFieldsColumn>
                   <QuantityInput
                     quantity={item.quantity}
                     onChange={(quantity) => handleQuantityChange(item.productId, quantity)}
                   />
-                </ItemQuantityField>
+                  <ExpirationDateInput
+                    expirationDate={item.expirationDate}
+                    onChange={(expirationDate) => handleExpirationDateChange(item.productId, expirationDate)}
+                  />
+                </ItemFieldsColumn>
                 <IconButton aria-label="Quitar producto" onClick={() => handleRemoveItem(item.productId)}>
                   <Delete />
                 </IconButton>

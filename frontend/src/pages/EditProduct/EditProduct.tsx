@@ -45,7 +45,6 @@ const validationSchema = yup.object({
   photoUrl: yup.string(),
   description: yup.string().trim().required('La descripción es obligatoria'),
   category: yup.string().trim().required('La categoría es obligatoria'),
-  expirationDate: yup.string().required('La fecha de caducidad es obligatoria'),
   quantityAmount: yup
     .number()
     .typeError('Introduce una cantidad')
@@ -62,15 +61,12 @@ interface EditProductFormValues {
   photoUrl: string
   description: string
   category: string
-  expirationDate: string
   quantityAmount: number | ''
   quantityUnit: QuantityUnit
   price: number | ''
   comment: string
   genericProductId: number | null
 }
-
-const toDateInputValue = (isoDate: string) => isoDate.slice(0, 10)
 
 export const EditProduct = () => {
   const { id = '' } = useParams<{ id: string }>()
@@ -99,7 +95,6 @@ export const EditProduct = () => {
       photoUrl: product?.photoUrl ?? '',
       description: product?.description ?? '',
       category: product?.category ?? '',
-      expirationDate: product ? toDateInputValue(product.expirationDate) : '',
       quantityAmount: product?.quantityAmount ?? '',
       quantityUnit: product?.quantityUnit ?? 'g',
       price: product?.price ?? '',
@@ -115,7 +110,6 @@ export const EditProduct = () => {
           photoUrl: values.photoUrl || undefined,
           description: values.description,
           category: values.category,
-          expirationDate: values.expirationDate,
           quantityAmount: Number(values.quantityAmount),
           quantityUnit: values.quantityUnit,
           price: values.price === '' ? undefined : Number(values.price),
@@ -302,19 +296,6 @@ export const EditProduct = () => {
           onBlur={formik.handleBlur}
           error={formik.touched.category && Boolean(formik.errors.category)}
           helperText={formik.touched.category && formik.errors.category}
-          fullWidth
-        />
-
-        <TextField
-          name="expirationDate"
-          label="Fecha de caducidad"
-          type="date"
-          value={formik.values.expirationDate}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={formik.touched.expirationDate && Boolean(formik.errors.expirationDate)}
-          helperText={formik.touched.expirationDate && formik.errors.expirationDate}
-          slotProps={{ inputLabel: { shrink: true } }}
           fullWidth
         />
 

@@ -198,14 +198,14 @@ Modelos actuales:
 [src/routers/product.router.ts](src/routers/product.router.ts).
 
 - Tabla propia `products` (modelo `Product` en `schema.prisma`): `barcode`, `name`,
-  `photoUrl`, `description`, `category`, `expirationDate` (date), `quantityAmount` (cantidad total
+  `photoUrl`, `description`, `category`, `quantityAmount` (cantidad total
   del envase, nullable por filas anteriores a este campo), `quantityUnit` (enum `g`/`ml`, nullable
-  por el mismo motivo), `quantityRemaining` (0-100, % restante — no confundir con `quantityAmount`,
-  que es el total del envase, no lo que queda), `comment`, `createdAt`. Sin `updatedAt` y sin
-  scoping por usuario (el `id` es la única PK).
+  por el mismo motivo), `comment`, `createdAt`. Sin `updatedAt` y sin
+  scoping por usuario (el `id` es la única PK). No tiene `expirationDate` — la fecha de caducidad
+  vive en `AvailableProduct` (ver más abajo), no en el producto genérico/catálogo.
 - `GET /products` — lista completa, ordenada por `createdAt` desc.
 - `POST /products` — crea uno nuevo. Valida a mano (`barcode`, `description`, `category`,
-  `expirationDate`, `quantityRemaining` obligatorios) y responde 400 si falta alguno.
+  `quantityAmount`, `quantityUnit` obligatorios) y responde 400 si falta alguno.
 - `PUT /products/:id` — actualiza campos parciales del producto (usado por la pantalla
   `EditProduct` del frontend). Responde 400 si `:id` no es un entero, 404 si Prisma no encuentra
   la fila (`P2025`).

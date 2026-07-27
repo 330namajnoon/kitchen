@@ -3,10 +3,11 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Slider from '@mui/material/Slider'
+import TextField from '@mui/material/TextField'
 import {
   useDeleteAvailableProductMutation,
   useGetAvailableProductQuery,
-  useUpdateAvailableProductPercentageMutation,
+  useUpdateAvailableProductMutation,
 } from '@/services/availableProductsApi'
 import { paths } from '@/routes/paths'
 import type { AvailableProduct } from '@/types/availableProduct'
@@ -28,8 +29,7 @@ import {
   SliderRow,
 } from './AvailableProductDetail.styles'
 
-const formatDate = (isoDate: string) =>
-  new Date(isoDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+const toDateInputValue = (isoDate: string) => isoDate.slice(0, 10)
 
 export const AvailableProductDetail = () => {
   const { id = '' } = useParams<{ id: string }>()
@@ -41,11 +41,15 @@ export const AvailableProductDetail = () => {
   const { data: fetchedAvailableProduct, isLoading, isError } = useGetAvailableProductQuery(availableProductId, {
     skip: Boolean(availableProductFromState),
   })
-  const [updatePercentage, { isLoading: isSaving }] = useUpdateAvailableProductPercentageMutation()
+  const [updateAvailableProduct, { isLoading: isSaving }] = useUpdateAvailableProductMutation()
   const [deleteAvailableProduct, { isLoading: isDeleting }] = useDeleteAvailableProductMutation()
 
   const availableProduct = availableProductFromState ?? fetchedAvailableProduct
   const [percentageRemaining, setPercentageRemaining] = useState(availableProduct?.percentageRemaining ?? 100)
+  const [expirationDate, setExpirationDate] = useState(
+    availableProduct?.expirationDate ? toDateInputValue(availableProduct.expirationDate) : '',
+  )
+  const [isSavingExpirationDate, setIsSavingExpirationDate] = useState(false)
 
   if (!Number.isInteger(availableProductId)) {
     return (
@@ -90,9 +94,22 @@ export const AvailableProductDetail = () => {
   const handleSliderCommit = async (value: number) => {
     setPercentageRemaining(value)
     try {
-      await updatePercentage({ id: availableProduct.id, percentageRemaining: value }).unwrap()
+      await updateAvailableProduct({ id: availableProduct.id, percentageRemaining: value }).unwrap()
     } catch {
       setPercentageRemaining(availableProduct.percentageRemaining)
+    }
+  }
+
+  const handleExpirationDateChange = async (value: string) => {
+    const previous = expirationDate
+    setExpirationDate(value)
+    setIsSavingExpirationDate(true)
+    try {
+      await updateAvailableProduct({ id: availableProduct.id, expirationDate: value || null }).unwrap()
+    } catch {
+      setExpirationDate(previous)
+    } finally {
+      setIsSavingExpirationDate(false)
     }
   }
 
@@ -131,7 +148,16 @@ export const AvailableProductDetail = () => {
 
         <DetailRow>
           <DetailLabel>Fecha de caducidad</DetailLabel>
-          <DetailValue>{formatDate(product.expirationDate)}</DetailValue>
+          <TextField
+            type="date"
+            size="small"
+            value={expirationDate}
+            onChange={(event) => handleExpirationDateChange(event.target.value)}
+            slotProps={{
+              inputLabel: { shrink: true },
+              input: { endAdornment: isSavingExpirationDate ? <CircularProgress size={16} /> : undefined },
+            }}
+          />
         </DetailRow>
 
         {product.quantityAmount !== undefined && product.quantityAmount !== null && (

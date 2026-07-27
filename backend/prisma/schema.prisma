@@ -42,7 +42,6 @@ model Product {
   photoUrl          String?       @db.VarChar(500)
   description       String        @db.VarChar(500)
   category          String        @db.VarChar(100)
-  expirationDate    DateTime      @db.Date
   quantityAmount    Float?
   quantityUnit      QuantityUnit?
   price             Float?
@@ -58,10 +57,11 @@ model Product {
 }
 
 model AvailableProduct {
-  id                  Int      @id @default(autoincrement())
-  quantity            Int      @default(1)
-  percentageRemaining Int      @default(100)
-  createdAt           DateTime @default(now())
+  id                  Int       @id @default(autoincrement())
+  quantity            Int       @default(1)
+  percentageRemaining Int       @default(100)
+  expirationDate      DateTime? @db.Date
+  createdAt           DateTime  @default(now())
 
   productId Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)

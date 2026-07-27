@@ -5,7 +5,7 @@ import {
   deleteAvailableProduct,
   getAvailableProductById,
   getAvailableProducts,
-  updateAvailableProductPercentage,
+  updateAvailableProduct,
   type AvailableProductItemInput,
 } from "@/services/available-product.service";
 import { logger } from "@/utils/logger";
@@ -19,7 +19,7 @@ const parseItems = (input: unknown): AvailableProductItemInput[] | null => {
   const items: AvailableProductItemInput[] = [];
   for (const item of input) {
     if (typeof item !== "object" || item === null) return null;
-    const { productId, quantity } = item as Record<string, unknown>;
+    const { productId, quantity, expirationDate } = item as Record<string, unknown>;
 
     if (productId === undefined || quantity === undefined) return null;
 
@@ -27,7 +27,14 @@ const parseItems = (input: unknown): AvailableProductItemInput[] | null => {
     const parsedQuantity = Number(quantity);
     if (!Number.isInteger(parsedProductId) || !Number.isInteger(parsedQuantity) || parsedQuantity <= 0) return null;
 
-    items.push({ productId: parsedProductId, quantity: parsedQuantity });
+    if (expirationDate !== undefined && typeof expirationDate !== "string") return null;
+    if (typeof expirationDate === "string" && Number.isNaN(new Date(expirationDate).getTime())) return null;
+
+    items.push({
+      productId: parsedProductId,
+      quantity: parsedQuantity,
+      expirationDate: expirationDate as string | undefined,
+    });
   }
 
   return items;
@@ -81,7 +88,7 @@ export const getAvailableProduct = createController(async (req, res) => {
   }
 });
 
-export const editAvailableProductPercentage = createController(async (req, res) => {
+export const editAvailableProduct = createController(async (req, res) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id)) {
@@ -89,16 +96,34 @@ export const editAvailableProductPercentage = createController(async (req, res) 
     return;
   }
 
-  const { percentageRemaining } = req.body;
-  const parsedPercentage = Number(percentageRemaining);
+  const { percentageRemaining, expirationDate } = req.body;
 
-  if (!Number.isInteger(parsedPercentage) || parsedPercentage < 0 || parsedPercentage > 100) {
-    res.status(400).json({ error: "Porcentaje restante inválido" });
-    return;
+  let parsedPercentage: number | undefined;
+  if (percentageRemaining !== undefined) {
+    parsedPercentage = Number(percentageRemaining);
+    if (!Number.isInteger(parsedPercentage) || parsedPercentage < 0 || parsedPercentage > 100) {
+      res.status(400).json({ error: "Porcentaje restante inválido" });
+      return;
+    }
+  }
+
+  let parsedExpirationDate: string | null | undefined;
+  if (expirationDate !== undefined) {
+    if (expirationDate === null || expirationDate === "") {
+      parsedExpirationDate = null;
+    } else if (typeof expirationDate !== "string" || Number.isNaN(new Date(expirationDate).getTime())) {
+      res.status(400).json({ error: "Fecha de caducidad inválida" });
+      return;
+    } else {
+      parsedExpirationDate = expirationDate;
+    }
   }
 
   try {
-    const availableProduct = await updateAvailableProductPercentage(id, parsedPercentage);
+    const availableProduct = await updateAvailableProduct(id, {
+      percentageRemaining: parsedPercentage,
+      expirationDate: parsedExpirationDate,
+    });
     res.json(availableProduct);
   } catch (error) {
     if (isNotFoundError(error)) {

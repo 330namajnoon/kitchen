@@ -1,7 +1,7 @@
 import type {
   AddAvailableProductsRequest,
   AvailableProduct,
-  UpdateAvailableProductPercentageRequest,
+  UpdateAvailableProductRequest,
 } from '@/types/availableProduct'
 import { api } from './api'
 
@@ -26,7 +26,7 @@ export const availableProductsApi = api.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'AvailableProduct', id: 'LIST' }],
     }),
-    updateAvailableProductPercentage: builder.mutation<AvailableProduct, UpdateAvailableProductPercentageRequest>({
+    updateAvailableProduct: builder.mutation<AvailableProduct, UpdateAvailableProductRequest>({
       query: ({ id, ...body }) => ({
         url: `/available-products/${id}`,
         method: 'PUT',
@@ -48,6 +48,6 @@ export const {
   useGetAvailableProductsQuery,
   useGetAvailableProductQuery,
   useAddAvailableProductsMutation,
-  useUpdateAvailableProductPercentageMutation,
+  useUpdateAvailableProductMutation,
   useDeleteAvailableProductMutation,
 } = availableProductsApi

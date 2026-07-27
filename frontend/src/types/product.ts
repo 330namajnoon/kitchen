@@ -21,7 +21,6 @@ export interface AddProductRequest {
   photoUrl?: string
   description: string
   category: string
-  expirationDate: string
   quantityAmount: number
   quantityUnit: QuantityUnit
   price?: number

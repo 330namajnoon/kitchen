@@ -2,7 +2,7 @@ import { createRouter } from "sm-express-server";
 
 import {
   addAvailableProducts,
-  editAvailableProductPercentage,
+  editAvailableProduct,
   getAvailableProduct,
   listAvailableProducts,
   removeAvailableProduct,
@@ -12,6 +12,6 @@ export const availableProductRouter = createRouter("/available-products", (route
   router.get("/", listAvailableProducts);
   router.get("/:id", getAvailableProduct);
   router.post("/", addAvailableProducts);
-  router.put("/:id", editAvailableProductPercentage);
+  router.put("/:id", editAvailableProduct);
   router.delete("/:id", removeAvailableProduct);
 });

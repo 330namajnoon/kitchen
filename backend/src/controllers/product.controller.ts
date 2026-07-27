@@ -18,7 +18,6 @@ export const addProduct = createController(async (req, res) => {
     photoUrl,
     description,
     category,
-    expirationDate,
     quantityAmount,
     quantityUnit,
     price,
@@ -30,7 +29,6 @@ export const addProduct = createController(async (req, res) => {
     !barcode ||
     !description ||
     !category ||
-    !expirationDate ||
     quantityAmount === undefined ||
     !quantityUnit
   ) {
@@ -45,7 +43,6 @@ export const addProduct = createController(async (req, res) => {
       photoUrl,
       description,
       category,
-      expirationDate,
       quantityAmount: Number(quantityAmount),
       quantityUnit,
       price: price === undefined ? undefined : Number(price),
@@ -83,7 +80,6 @@ export const editProduct = createController(async (req, res) => {
     photoUrl,
     description,
     category,
-    expirationDate,
     quantityAmount,
     quantityUnit,
     price,
@@ -98,7 +94,6 @@ export const editProduct = createController(async (req, res) => {
       photoUrl,
       description,
       category,
-      expirationDate,
       quantityAmount: quantityAmount === undefined ? undefined : Number(quantityAmount),
       quantityUnit,
       price: price === undefined ? undefined : Number(price),

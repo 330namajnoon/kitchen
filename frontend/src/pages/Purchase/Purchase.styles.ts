@@ -108,7 +108,10 @@ export const ItemName = styled.span`
   white-space: nowrap;
 `
 
-export const ItemQuantityField = styled.div`
-  width: 90px;
+export const ItemFieldsColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 130px;
   flex-shrink: 0;
 `

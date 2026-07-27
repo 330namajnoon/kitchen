@@ -38,6 +38,7 @@ import {
 
 const DRAFT_STORAGE_KEY = 'kitchen:addProductDraft'
 const DETECTED_PRODUCT_STORAGE_KEY = 'kitchen:addProductDetected'
+const RETURN_CONTEXT_STORAGE_KEY = 'kitchen:addProductReturnContext'
 
 /** Convierte un tag de Open Food Facts (ej. "en:whole-milk") en texto legible. */
 const formatTag = (tag: string) => {
@@ -106,6 +107,20 @@ export const AddProduct = () => {
   const storedDetectedProduct = code ? sessionStorage.getItem(`${DETECTED_PRODUCT_STORAGE_KEY}:${code}`) : null
   const detectedProduct: ProductLookupResponse | undefined =
     stateDetectedProduct ?? (storedDetectedProduct ? JSON.parse(storedDetectedProduct) : undefined)
+
+  // Igual que con detectedProduct: se persiste en sessionStorage bajo el código sintético para
+  // sobrevivir al ir y volver de "crear producto genérico" (que reemplaza location.state).
+  const stateReturnContext = (location.state as { returnTo?: string; presetGenericProductId?: number } | null) ?? {}
+  useEffect(() => {
+    if (code && (stateReturnContext.returnTo || stateReturnContext.presetGenericProductId)) {
+      sessionStorage.setItem(`${RETURN_CONTEXT_STORAGE_KEY}:${code}`, JSON.stringify(stateReturnContext))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, stateReturnContext.returnTo, stateReturnContext.presetGenericProductId])
+  const storedReturnContext = code ? sessionStorage.getItem(`${RETURN_CONTEXT_STORAGE_KEY}:${code}`) : null
+  const returnContext: { returnTo?: string; presetGenericProductId?: number } = storedReturnContext
+    ? JSON.parse(storedReturnContext)
+    : stateReturnContext
   const {
     data: lookupData,
     isLoading,
@@ -138,7 +153,7 @@ export const AddProduct = () => {
       quantityUnit: suggestedQuantity?.unit ?? 'g',
       price: '',
       comment: '',
-      genericProductId: suggestedGenericProduct?.id ?? null,
+      genericProductId: returnContext.presetGenericProductId ?? suggestedGenericProduct?.id ?? null,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -157,8 +172,11 @@ export const AddProduct = () => {
           genericProductId: values.genericProductId ?? undefined,
         }).unwrap()
         sessionStorage.removeItem(DRAFT_STORAGE_KEY)
-        if (code) sessionStorage.removeItem(`${DETECTED_PRODUCT_STORAGE_KEY}:${code}`)
-        navigate(paths.products)
+        if (code) {
+          sessionStorage.removeItem(`${DETECTED_PRODUCT_STORAGE_KEY}:${code}`)
+          sessionStorage.removeItem(`${RETURN_CONTEXT_STORAGE_KEY}:${code}`)
+        }
+        navigate(returnContext.returnTo ?? paths.products)
       } catch {
         // el error se muestra debajo del formulario
       }

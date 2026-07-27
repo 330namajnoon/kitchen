@@ -24,6 +24,8 @@ export const buildAddProductPath = (code: string) => `/productos/anadir/${code}`
 export const buildEditProductPath = (id: number) => `/productos/${id}/editar`
 export const buildEditGenericProductPath = (id: number) => `/productos-genericos/${id}/editar`
 export const buildEditRecipePath = (id: number) => `/recetas/${id}/editar`
+export const buildAddShoppingListPath = (recipeIds?: number[]) =>
+  recipeIds && recipeIds.length > 0 ? `/listas-compra/anadir?recipeIds=${recipeIds.join(',')}` : paths.addShoppingList
 export const buildEditShoppingListPath = (id: number) => `/listas-compra/${id}/editar`
 export const buildEditAvailableProductPath = (id: number) => `/disponibles/${id}`
 export const buildPurchasePath = (productIds?: number[]) =>

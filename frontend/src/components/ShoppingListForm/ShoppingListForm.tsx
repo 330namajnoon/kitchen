@@ -4,18 +4,29 @@ import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import { ShoppingListItemsEditor } from '@/components/ShoppingListItemsEditor'
 import type { GenericProduct } from '@/types/genericProduct'
+import type { Product } from '@/types/product'
 import type { ShoppingListFormValues } from '@/types/shoppingList'
 import { Form, SectionTitle } from './ShoppingListForm.styles'
 
 interface ShoppingListFormProps {
   formik: FormikProps<ShoppingListFormValues>
   genericProducts: GenericProduct[]
+  products: Product[]
   onCreateGenericProduct: () => void
+  onAddProduct: (genericProductId: number, method: 'manual' | 'scan' | 'ai') => void
   showStatus?: boolean
   footer: ReactNode
 }
 
-export const ShoppingListForm = ({ formik, genericProducts, onCreateGenericProduct, showStatus, footer }: ShoppingListFormProps) => {
+export const ShoppingListForm = ({
+  formik,
+  genericProducts,
+  products,
+  onCreateGenericProduct,
+  onAddProduct,
+  showStatus,
+  footer,
+}: ShoppingListFormProps) => {
   return (
     <Form onSubmit={formik.handleSubmit}>
       <TextField
@@ -50,8 +61,10 @@ export const ShoppingListForm = ({ formik, genericProducts, onCreateGenericProdu
       <ShoppingListItemsEditor
         items={formik.values.items}
         genericProducts={genericProducts}
+        products={products}
         onChange={(items) => formik.setFieldValue('items', items)}
         onCreateGenericProduct={onCreateGenericProduct}
+        onAddProduct={onAddProduct}
       />
       {typeof formik.errors.items === 'string' && formik.touched.items && <p>{formik.errors.items}</p>}
 

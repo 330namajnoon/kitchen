@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { ButtonsRow } from '@/components/ShoppingListForm/ShoppingListForm.styles'
 import { ShoppingListForm } from '@/components/ShoppingListForm'
 import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
+import { useGetProductsQuery } from '@/services/productsApi'
 import { useDeleteShoppingListMutation, useGetShoppingListsQuery, useUpdateShoppingListMutation } from '@/services/shoppingListsApi'
 import { paths } from '@/routes/paths'
 import type { ShoppingList, ShoppingListFormValues } from '@/types/shoppingList'
@@ -28,6 +29,7 @@ export const EditShoppingList = () => {
 
   const { data: shoppingLists, isLoading, isError } = useGetShoppingListsQuery(undefined, { skip: Boolean(shoppingListFromState) })
   const { data: genericProducts } = useGetGenericProductsQuery()
+  const { data: products } = useGetProductsQuery()
   const [updateShoppingList, { isLoading: isSaving }] = useUpdateShoppingListMutation()
   const [deleteShoppingList, { isLoading: isDeleting }] = useDeleteShoppingListMutation()
 
@@ -103,6 +105,15 @@ export const EditShoppingList = () => {
     navigate(paths.addGenericProduct, { state: { returnTo: location.pathname, returnState: { shoppingList } } })
   }
 
+  const handleAddProduct = (genericProductId: number, method: 'manual' | 'scan' | 'ai') => {
+    if (method === 'manual') return
+
+    sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formik.values))
+    navigate(method === 'scan' ? paths.scanBarcode : paths.detectProduct, {
+      state: { returnTo: location.pathname, presetGenericProductId: genericProductId },
+    })
+  }
+
   const handleDelete = async () => {
     if (!window.confirm('¿Seguro que quieres borrar esta lista de la compra?')) return
 
@@ -157,7 +168,9 @@ export const EditShoppingList = () => {
       <ShoppingListForm
         formik={formik}
         genericProducts={genericProducts ?? []}
+        products={products ?? []}
         onCreateGenericProduct={handleCreateGenericProduct}
+        onAddProduct={handleAddProduct}
         showStatus
         footer={
           <ButtonsRow>

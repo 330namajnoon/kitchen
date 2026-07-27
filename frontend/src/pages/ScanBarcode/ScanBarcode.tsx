@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { BarcodeDetector as BarcodeDetectorPonyfill } from 'barcode-detector/ponyfill'
 import CloseIcon from '@mui/icons-material/Close'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -19,13 +19,16 @@ const CONFIRMATIONS_REQUIRED = 2
 
 export const ScanBarcode = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { returnTo, presetGenericProductId } =
+    (location.state as { returnTo?: string; presetGenericProductId?: number } | null) ?? {}
   const videoRef = useRef<HTMLVideoElement>(null)
   const viewfinderRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'))
   const streamRef = useRef<MediaStream | null>(null)
   const [permission, setPermission] = useState<PermissionState>('requesting')
 
-  const handleClose = useCallback(() => navigate(paths.products), [navigate])
+  const handleClose = useCallback(() => navigate(returnTo ?? paths.products), [navigate, returnTo])
 
   useEffect(() => {
     let cancelled = false
@@ -93,7 +96,7 @@ export const ScanBarcode = () => {
               if (pendingCount >= CONFIRMATIONS_REQUIRED) {
                 cancelled = true
                 streamRef.current?.getTracks().forEach((track) => track.stop())
-                navigate(buildAddProductPath(value))
+                navigate(buildAddProductPath(value), { state: { returnTo, presetGenericProductId } })
               }
             } else {
               pendingCode = null
@@ -137,7 +140,7 @@ export const ScanBarcode = () => {
       cancelAnimationFrame(frameId)
       streamRef.current?.getTracks().forEach((track) => track.stop())
     }
-  }, [navigate])
+  }, [navigate, returnTo, presetGenericProductId])
 
   return (
     <ScannerWrapper>

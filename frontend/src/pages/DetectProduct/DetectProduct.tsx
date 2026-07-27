@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import CloseIcon from '@mui/icons-material/Close'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDetectProductMutation } from '@/services/productDetectApi'
@@ -17,13 +17,16 @@ type PermissionState = 'requesting' | 'granted' | 'denied'
 
 export const DetectProduct = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { returnTo, presetGenericProductId } =
+    (location.state as { returnTo?: string; presetGenericProductId?: number } | null) ?? {}
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [permission, setPermission] = useState<PermissionState>('requesting')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [detectProduct, { isLoading }] = useDetectProductMutation()
 
-  const handleClose = useCallback(() => navigate(paths.products), [navigate])
+  const handleClose = useCallback(() => navigate(returnTo ?? paths.products), [navigate, returnTo])
 
   useEffect(() => {
     let cancelled = false
@@ -68,7 +71,7 @@ export const DetectProduct = () => {
       const detected = await detectProduct(photo).unwrap()
       streamRef.current?.getTracks().forEach((track) => track.stop())
       const syntheticCode = `ia-${crypto.randomUUID()}`
-      navigate(buildAddProductPath(syntheticCode), { state: { detectedProduct: detected } })
+      navigate(buildAddProductPath(syntheticCode), { state: { detectedProduct: detected, returnTo, presetGenericProductId } })
     } catch {
       setErrorMessage('No se ha podido analizar la foto. Inténtalo de nuevo.')
     }

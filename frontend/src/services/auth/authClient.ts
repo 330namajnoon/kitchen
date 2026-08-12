@@ -9,7 +9,7 @@ const SCOPE = 'openid email profile offline_access'
 // Debe coincidir exactamente con uno de los redirect_uris registrados para "kitchen-web" en
 // auth-server (config/clients.ts) — path fijo, independiente del basename de react-router.
 function getRedirectUri() {
-  return new URL('/kitchen/callback', window.location.origin).toString()
+  return new URL('/callback', window.location.origin).toString()
 }
 
 export async function redirectToLogin() {

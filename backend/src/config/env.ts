@@ -5,6 +5,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   staticDir: process.env.STATIC_DIR ?? "./public",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  authIssuer: process.env.AUTH_ISSUER ?? "https://auth.sinul.es",
   mariadb: {
     port: Number(process.env.MARIADB_PORT) || 3306,
     database: process.env.MARIADB_DATABASE ?? "kitchen",

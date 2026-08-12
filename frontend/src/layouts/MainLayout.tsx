@@ -4,6 +4,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
 import KitchenIcon from '@mui/icons-material/Kitchen'
+import LogoutIcon from '@mui/icons-material/Logout'
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import Drawer from '@mui/material/Drawer'
@@ -11,6 +12,8 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import { paths } from '@/routes/paths'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { logout, selectAuthUser } from '@/store/slices/authSlice'
 import {
   BottomNav,
   BottomNavLink,
@@ -26,6 +29,8 @@ import {
 export const MainLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
+  const dispatch = useAppDispatch()
+  const user = useAppSelector(selectAuthUser)
 
   return (
     <LayoutWrapper>
@@ -35,8 +40,23 @@ export const MainLayout = () => {
           <NavLink as={Link} to={paths.home}>
             Home
           </NavLink>
-          <NavLink as={Link} to={paths.login}>
-            Login
+          <NavLink
+            as="button"
+            type="button"
+            onClick={() => dispatch(logout())}
+            title={user?.email}
+            style={{
+              border: 'none',
+              background: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              font: 'inherit',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <LogoutIcon fontSize="small" /> Cerrar sesión
           </NavLink>
           <NavLink as={Link} to={paths.products}>
             Productos
@@ -62,11 +82,12 @@ export const MainLayout = () => {
       <Drawer anchor="right" open={menuOpen} onClose={() => setMenuOpen(false)}>
         <List sx={{ width: 240 }}>
           <ListItemButton
-            component={Link}
-            to={paths.login}
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              setMenuOpen(false)
+              dispatch(logout())
+            }}
           >
-            <ListItemText primary="Login" />
+            <ListItemText primary="Cerrar sesión" secondary={user?.email} />
           </ListItemButton>
           <ListItemButton
             component={Link}

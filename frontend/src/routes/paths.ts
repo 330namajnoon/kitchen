@@ -1,6 +1,7 @@
 export const paths = {
   home: '/',
   login: '/login',
+  callback: '/callback',
   products: '/productos',
   scanBarcode: '/productos/escanear',
   detectProduct: '/productos/detectar',

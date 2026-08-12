@@ -6,6 +6,7 @@ import { AddRecipe } from '@/pages/AddRecipe'
 import { AddShoppingList } from '@/pages/AddShoppingList'
 import { AvailableProductDetail } from '@/pages/AvailableProductDetail'
 import { AvailableProducts } from '@/pages/AvailableProducts'
+import { Callback } from '@/pages/Callback'
 import { DetectProduct } from '@/pages/DetectProduct'
 import { EditGenericProduct } from '@/pages/EditGenericProduct'
 import { EditProduct } from '@/pages/EditProduct'
@@ -20,31 +21,35 @@ import { Recipes } from '@/pages/Recipes'
 import { ScanBarcode } from '@/pages/ScanBarcode'
 import { ShoppingLists } from '@/pages/ShoppingLists'
 import { paths } from './paths'
+import { RequireAuth } from './RequireAuth'
 
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
-        <Route path={paths.home} element={<Home />} />
-        <Route path={paths.login} element={<Login />} />
-        <Route path={paths.products} element={<Products />} />
-        <Route path={paths.addProduct} element={<AddProduct />} />
-        <Route path={paths.editProduct} element={<EditProduct />} />
-        <Route path={paths.genericProducts} element={<GenericProducts />} />
-        <Route path={paths.addGenericProduct} element={<AddGenericProduct />} />
-        <Route path={paths.editGenericProduct} element={<EditGenericProduct />} />
-        <Route path={paths.recipes} element={<Recipes />} />
-        <Route path={paths.addRecipe} element={<AddRecipe />} />
-        <Route path={paths.editRecipe} element={<EditRecipe />} />
-        <Route path={paths.shoppingLists} element={<ShoppingLists />} />
-        <Route path={paths.addShoppingList} element={<AddShoppingList />} />
-        <Route path={paths.editShoppingList} element={<EditShoppingList />} />
-        <Route path={paths.purchase} element={<Purchase />} />
-        <Route path={paths.availableProducts} element={<AvailableProducts />} />
-        <Route path={paths.editAvailableProduct} element={<AvailableProductDetail />} />
+      <Route path={paths.login} element={<Login />} />
+      <Route path={paths.callback} element={<Callback />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<MainLayout />}>
+          <Route path={paths.home} element={<Home />} />
+          <Route path={paths.products} element={<Products />} />
+          <Route path={paths.addProduct} element={<AddProduct />} />
+          <Route path={paths.editProduct} element={<EditProduct />} />
+          <Route path={paths.genericProducts} element={<GenericProducts />} />
+          <Route path={paths.addGenericProduct} element={<AddGenericProduct />} />
+          <Route path={paths.editGenericProduct} element={<EditGenericProduct />} />
+          <Route path={paths.recipes} element={<Recipes />} />
+          <Route path={paths.addRecipe} element={<AddRecipe />} />
+          <Route path={paths.editRecipe} element={<EditRecipe />} />
+          <Route path={paths.shoppingLists} element={<ShoppingLists />} />
+          <Route path={paths.addShoppingList} element={<AddShoppingList />} />
+          <Route path={paths.editShoppingList} element={<EditShoppingList />} />
+          <Route path={paths.purchase} element={<Purchase />} />
+          <Route path={paths.availableProducts} element={<AvailableProducts />} />
+          <Route path={paths.editAvailableProduct} element={<AvailableProductDetail />} />
+        </Route>
+        <Route path={paths.scanBarcode} element={<ScanBarcode />} />
+        <Route path={paths.detectProduct} element={<DetectProduct />} />
       </Route>
-      <Route path={paths.scanBarcode} element={<ScanBarcode />} />
-      <Route path={paths.detectProduct} element={<DetectProduct />} />
     </Routes>
   )
 }

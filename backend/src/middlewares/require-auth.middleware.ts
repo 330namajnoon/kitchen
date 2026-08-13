@@ -18,7 +18,9 @@ function getKey(header: JwtHeader, callback: SigningKeyCallback) {
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (req.path === "/health") return next();
+  // Rutas fuera de /api son del build del frontend (estáticos + fallback SPA), no llevan token.
+  if (!req.path.startsWith("/api/")) return next();
+  if (req.path === "/api/health") return next();
 
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : null;

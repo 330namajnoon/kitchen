@@ -18,4 +18,4 @@ export const routers: RouterDefinition[] = [
   recipeRouter,
   shoppingListRouter,
   availableProductRouter,
-];
+].map((router) => ({ ...router, path: `/api${router.path}` }));

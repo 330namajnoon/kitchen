@@ -3,7 +3,12 @@ import type {
   AvailableProduct,
   UpdateAvailableProductRequest,
 } from '@/types/availableProduct'
+import type { QuantityUnit } from '@/types/product'
 import { api } from './api'
+
+export interface ConsumeAvailableProductsRequest {
+  items: Array<{ genericProductId: number; quantityAmount: number; quantityUnit: QuantityUnit }>
+}
 
 export const availableProductsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -41,6 +46,14 @@ export const availableProductsApi = api.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, id) => [{ type: 'AvailableProduct', id }, { type: 'AvailableProduct', id: 'LIST' }],
     }),
+    consumeAvailableProducts: builder.mutation<AvailableProduct[], ConsumeAvailableProductsRequest>({
+      query: (body) => ({
+        url: '/available-products/consume',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'AvailableProduct', id: 'LIST' }],
+    }),
   }),
 })
 
@@ -50,4 +63,5 @@ export const {
   useAddAvailableProductsMutation,
   useUpdateAvailableProductMutation,
   useDeleteAvailableProductMutation,
+  useConsumeAvailableProductsMutation,
 } = availableProductsApi

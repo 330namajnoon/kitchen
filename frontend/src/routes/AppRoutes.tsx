@@ -7,6 +7,9 @@ import { AddShoppingList } from '@/pages/AddShoppingList'
 import { AvailableProductDetail } from '@/pages/AvailableProductDetail'
 import { AvailableProducts } from '@/pages/AvailableProducts'
 import { Callback } from '@/pages/Callback'
+import { Cook } from '@/pages/Cook'
+import { CookedMealDetail } from '@/pages/CookedMealDetail'
+import { CookedMeals } from '@/pages/CookedMeals'
 import { DetectProduct } from '@/pages/DetectProduct'
 import { EditGenericProduct } from '@/pages/EditGenericProduct'
 import { EditProduct } from '@/pages/EditProduct'
@@ -40,6 +43,9 @@ export const AppRoutes = () => {
           <Route path={paths.recipes} element={<Recipes />} />
           <Route path={paths.addRecipe} element={<AddRecipe />} />
           <Route path={paths.editRecipe} element={<EditRecipe />} />
+          <Route path={paths.cook} element={<Cook />} />
+          <Route path={paths.cookedMeals} element={<CookedMeals />} />
+          <Route path={paths.cookedMealDetail} element={<CookedMealDetail />} />
           <Route path={paths.shoppingLists} element={<ShoppingLists />} />
           <Route path={paths.addShoppingList} element={<AddShoppingList />} />
           <Route path={paths.editShoppingList} element={<EditShoppingList />} />

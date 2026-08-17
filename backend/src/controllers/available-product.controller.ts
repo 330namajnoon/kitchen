@@ -1,17 +1,51 @@
 import { createController } from "sm-express-server";
 
 import {
+  consumeStock,
   createAvailableProducts,
   deleteAvailableProduct,
   getAvailableProductById,
   getAvailableProducts,
   updateAvailableProduct,
   type AvailableProductItemInput,
+  type ConsumeStockItem,
 } from "@/services/available-product.service";
 import { logger } from "@/utils/logger";
 
 const isNotFoundError = (error: unknown) =>
   typeof error === "object" && error !== null && "code" in error && (error as { code: unknown }).code === "P2025";
+
+const parseConsumeItems = (input: unknown): ConsumeStockItem[] | null => {
+  if (!Array.isArray(input) || input.length === 0) return null;
+
+  const items: ConsumeStockItem[] = [];
+  for (const item of input) {
+    if (typeof item !== "object" || item === null) return null;
+    const { genericProductId, quantityAmount, quantityUnit } = item as Record<string, unknown>;
+
+    if (
+      genericProductId === undefined ||
+      quantityAmount === undefined ||
+      !["g", "ml", "u", "tsp", "tbsp", "pinch", "cup"].includes(quantityUnit as string)
+    ) {
+      return null;
+    }
+
+    const parsedGenericProductId = Number(genericProductId);
+    const parsedQuantityAmount = Number(quantityAmount);
+    if (!Number.isInteger(parsedGenericProductId) || !Number.isFinite(parsedQuantityAmount) || parsedQuantityAmount <= 0) {
+      return null;
+    }
+
+    items.push({
+      genericProductId: parsedGenericProductId,
+      quantityAmount: parsedQuantityAmount,
+      quantityUnit: quantityUnit as "g" | "ml" | "u" | "tsp" | "tbsp" | "pinch" | "cup",
+    });
+  }
+
+  return items;
+};
 
 const parseItems = (input: unknown): AvailableProductItemInput[] | null => {
   if (!Array.isArray(input) || input.length === 0) return null;
@@ -153,5 +187,23 @@ export const removeAvailableProduct = createController(async (req, res) => {
     }
     logger.error("Error borrando producto disponible", error);
     res.status(500).json({ error: "No se pudo borrar el producto disponible" });
+  }
+});
+
+export const consumeAvailableProducts = createController(async (req, res) => {
+  const parsedItems = parseConsumeItems(req.body.items);
+
+  if (!parsedItems) {
+    res.status(400).json({ error: "Lista de productos a consumir inválida" });
+    return;
+  }
+
+  try {
+    await consumeStock(parsedItems);
+    const availableProducts = await getAvailableProducts();
+    res.json(availableProducts);
+  } catch (error) {
+    logger.error("Error consumiendo productos disponibles", error);
+    res.status(500).json({ error: "No se pudo descontar el stock consumido" });
   }
 });

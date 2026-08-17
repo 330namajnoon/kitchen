@@ -1,5 +1,5 @@
 import type { AddProductRequest, Product, UpdateProductRequest } from '@/types/product'
-import { API_BASE_URL, api } from './api'
+import { STATIC_BASE_URL, api } from './api'
 
 export const productsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -43,7 +43,7 @@ export const productsApi = api.injectEndpoints({
           body: formData,
         }
       },
-      transformResponse: (response: { url: string }) => ({ url: `${API_BASE_URL}${response.url}` }),
+      transformResponse: (response: { url: string }) => ({ url: `${STATIC_BASE_URL}${response.url}` }),
     }),
   }),
 })

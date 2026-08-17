@@ -67,6 +67,9 @@ export const MainLayout = () => {
           <NavLink as={Link} to={paths.recipes}>
             Recetas
           </NavLink>
+          <NavLink as={Link} to={paths.cookedMeals}>
+            Cocinadas
+          </NavLink>
           <NavLink as={Link} to={paths.shoppingLists}>
             Listas de la compra
           </NavLink>
@@ -95,6 +98,13 @@ export const MainLayout = () => {
             onClick={() => setMenuOpen(false)}
           >
             <ListItemText primary="Productos genéricos" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to={paths.cookedMeals}
+            onClick={() => setMenuOpen(false)}
+          >
+            <ListItemText primary="Cocinadas" />
           </ListItemButton>
         </List>
       </Drawer>

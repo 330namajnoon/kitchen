@@ -13,6 +13,9 @@ export const paths = {
   recipes: '/recetas',
   addRecipe: '/recetas/anadir',
   editRecipe: '/recetas/:id/editar',
+  cook: '/recetas/cocinar',
+  cookedMeals: '/cocinadas',
+  cookedMealDetail: '/cocinadas/:id',
   shoppingLists: '/listas-compra',
   addShoppingList: '/listas-compra/anadir',
   editShoppingList: '/listas-compra/:id/editar',
@@ -25,6 +28,8 @@ export const buildAddProductPath = (code: string) => `/productos/anadir/${code}`
 export const buildEditProductPath = (id: number) => `/productos/${id}/editar`
 export const buildEditGenericProductPath = (id: number) => `/productos-genericos/${id}/editar`
 export const buildEditRecipePath = (id: number) => `/recetas/${id}/editar`
+export const buildCookPath = (recipeIds: number[]) => `/recetas/cocinar?recipeIds=${recipeIds.join(',')}`
+export const buildCookedMealDetailPath = (id: number) => `/cocinadas/${id}`
 export const buildAddShoppingListPath = (recipeIds?: number[]) =>
   recipeIds && recipeIds.length > 0 ? `/listas-compra/anadir?recipeIds=${recipeIds.join(',')}` : paths.addShoppingList
 export const buildEditShoppingListPath = (id: number) => `/listas-compra/${id}/editar`

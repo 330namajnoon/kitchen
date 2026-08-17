@@ -9,11 +9,10 @@ import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { useGetProductsQuery } from '@/services/productsApi'
 import { useGetRecipesQuery } from '@/services/recipesApi'
 import { useAddShoppingListMutation } from '@/services/shoppingListsApi'
+import { ADD_SHOPPING_LIST_DRAFT_KEY as DRAFT_STORAGE_KEY } from '@/constants/storageKeys'
 import { paths } from '@/routes/paths'
 import type { ShoppingListFormValues, ShoppingListItemInput } from '@/types/shoppingList'
 import { AddShoppingListWrapper, PageTitle } from './AddShoppingList.styles'
-
-const DRAFT_STORAGE_KEY = 'kitchen:addShoppingListDraft'
 
 const validationSchema = yup.object({
   estimatedPurchaseDate: yup.string().required('La fecha estimada es obligatoria'),

@@ -1,5 +1,5 @@
 import type { ProductLookupResponse } from '@/types/product'
-import { API_BASE_URL, api } from './api'
+import { STATIC_BASE_URL, api } from './api'
 
 export const productDetectApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,8 +15,8 @@ export const productDetectApi = api.injectEndpoints({
       },
       transformResponse: (response: ProductLookupResponse) => ({
         ...response,
-        productImage: response.productImage ? `${API_BASE_URL}${response.productImage}` : undefined,
-        productImageFrontUrl: response.productImageFrontUrl ? `${API_BASE_URL}${response.productImageFrontUrl}` : undefined,
+        productImage: response.productImage ? `${STATIC_BASE_URL}${response.productImage}` : undefined,
+        productImageFrontUrl: response.productImageFrontUrl ? `${STATIC_BASE_URL}${response.productImageFrontUrl}` : undefined,
       }),
     }),
   }),

@@ -75,9 +75,10 @@ model GenericProduct {
   description String?  @db.VarChar(500)
   createdAt   DateTime @default(now())
 
-  products          Product[]
-  recipeIngredients RecipeIngredient[]
-  shoppingListItems ShoppingListItem[]
+  products              Product[]
+  recipeIngredients     RecipeIngredient[]
+  shoppingListItems     ShoppingListItem[]
+  cookedMealIngredients CookedMealIngredient[]
 
   @@map("generic_products")
 }
@@ -91,8 +92,37 @@ model Recipe {
   createdAt   DateTime @default(now())
 
   ingredients RecipeIngredient[]
+  cookedMeals CookedMeal[]
 
   @@map("recipes")
+}
+
+model CookedMeal {
+  id       Int      @id @default(autoincrement())
+  cookedAt DateTime @default(now())
+  servings Int
+  rating   Int?     @db.TinyInt
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  ingredients CookedMealIngredient[]
+
+  @@map("cooked_meals")
+}
+
+model CookedMealIngredient {
+  id             Int          @id @default(autoincrement())
+  quantityAmount Float
+  quantityUnit   QuantityUnit
+
+  cookedMealId Int
+  cookedMeal   CookedMeal @relation(fields: [cookedMealId], references: [id], onDelete: Cascade)
+
+  genericProductId Int
+  genericProduct   GenericProduct @relation(fields: [genericProductId], references: [id])
+
+  @@map("cooked_meal_ingredients")
 }
 
 model RecipeIngredient {

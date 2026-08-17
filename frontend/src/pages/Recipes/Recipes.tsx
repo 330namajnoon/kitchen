@@ -9,7 +9,7 @@ import Fab from '@mui/material/Fab'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import { useGetRecipesQuery } from '@/services/recipesApi'
-import { buildAddShoppingListPath, buildEditRecipePath, paths } from '@/routes/paths'
+import { buildAddShoppingListPath, buildCookPath, buildEditRecipePath, paths } from '@/routes/paths'
 import {
   CenteredState,
   PageTitle,
@@ -76,7 +76,7 @@ export const Recipes = () => {
   }
 
   const handlePrepare = () => {
-    // TODO: preparar las recetas seleccionadas
+    navigate(buildCookPath(selectedIds))
   }
 
   const handleGoToShoppingList = () => {

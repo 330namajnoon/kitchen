@@ -6,6 +6,11 @@ import type { RootState } from '@/store'
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4001'
 
+// Los uploads (public/uploads/...) los sirve el backend en la raíz del dominio, no bajo /api
+// (solo los routers de la API cuelgan de /api, ver backend/src/routers/index.router.ts). Por eso
+// las URLs de imagen no pueden construirse con API_BASE_URL directamente.
+export const STATIC_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '')
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
@@ -52,6 +57,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Product', 'GenericProduct', 'Recipe', 'ShoppingList', 'AvailableProduct'],
+  tagTypes: ['Product', 'GenericProduct', 'Recipe', 'ShoppingList', 'AvailableProduct', 'CookedMeal'],
   endpoints: () => ({}),
 })

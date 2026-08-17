@@ -2,6 +2,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { useRef } from 'react'
 import type { FormikProps } from 'formik'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
+import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import { RecipeIngredientsEditor } from '@/components/RecipeIngredientsEditor'
@@ -15,6 +16,7 @@ interface RecipeFormProps {
   onCreateGenericProduct: () => void
   onPhotoSelected: (file: File) => void
   isUploadingPhoto: boolean
+  photoError?: string | null
   footer: ReactNode
 }
 
@@ -24,6 +26,7 @@ export const RecipeForm = ({
   onCreateGenericProduct,
   onPhotoSelected,
   isUploadingPhoto,
+  photoError,
   footer,
 }: RecipeFormProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -43,6 +46,8 @@ export const RecipeForm = ({
         </PhotoButton>
         <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePhotoInputChange} />
       </PhotoRow>
+
+      {photoError && <Alert severity="error">{photoError}</Alert>}
 
       <TextField
         name="name"

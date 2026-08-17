@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -10,6 +10,7 @@ import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { useDeleteRecipeMutation, useGetRecipesQuery, useUpdateRecipeMutation, useUploadRecipePhotoMutation } from '@/services/recipesApi'
 import { paths } from '@/routes/paths'
 import type { Recipe, RecipeFormValues } from '@/types/recipe'
+import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
 import { CenteredState, EditRecipeWrapper, PageTitle } from './EditRecipe.styles'
 
 const DRAFT_STORAGE_KEY = 'kitchen:editRecipeDraft'
@@ -39,6 +40,7 @@ export const EditRecipe = () => {
   const [updateRecipe, { isLoading: isSaving }] = useUpdateRecipeMutation()
   const [deleteRecipe, { isLoading: isDeleting }] = useDeleteRecipeMutation()
   const [uploadPhoto, { isLoading: isUploadingPhoto }] = useUploadRecipePhotoMutation()
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   const recipe = recipeFromState ?? recipes?.find((item) => item.id === recipeId)
 
@@ -128,10 +130,11 @@ export const EditRecipe = () => {
 
   const handlePhotoSelected = async (file: File) => {
     try {
+      setPhotoError(null)
       const { url } = await uploadPhoto(file).unwrap()
       formik.setFieldValue('photoUrl', url)
-    } catch {
-      // el error se muestra debajo del formulario
+    } catch (err) {
+      setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))
     }
   }
 
@@ -192,9 +195,10 @@ export const EditRecipe = () => {
         onCreateGenericProduct={handleCreateGenericProduct}
         onPhotoSelected={handlePhotoSelected}
         isUploadingPhoto={isUploadingPhoto}
+        photoError={photoError}
         footer={
           <ButtonsRow>
-            <Button type="submit" variant="contained" fullWidth disabled={isSaving || isDeleting}>
+            <Button type="submit" variant="contained" fullWidth disabled={isSaving || isDeleting || isUploadingPhoto}>
               {isSaving ? <CircularProgress size={24} /> : 'Guardar'}
             </Button>
             <Button variant="outlined" color="error" fullWidth disabled={isSaving || isDeleting} onClick={handleDelete}>

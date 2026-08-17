@@ -1,10 +1,11 @@
 import type { ChangeEvent } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import Add from '@mui/icons-material/Add'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
+import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -21,6 +22,7 @@ import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
 import type { Product, QuantityUnit } from '@/types/product'
 import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
+import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
 import {
   ButtonsRow,
   CenteredState,
@@ -79,6 +81,7 @@ export const EditProduct = () => {
   const [updateProduct, { isLoading: isSaving }] = useUpdateProductMutation()
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation()
   const [uploadProductPhoto, { isLoading: isUploadingPhoto }] = useUploadProductPhotoMutation()
+  const [photoError, setPhotoError] = useState<string | null>(null)
   const { data: genericProducts } = useGetGenericProductsQuery()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -160,10 +163,11 @@ export const EditProduct = () => {
     if (!file) return
 
     try {
+      setPhotoError(null)
       const { url } = await uploadProductPhoto(file).unwrap()
       formik.setFieldValue('photoUrl', url)
-    } catch {
-      // el error se muestra debajo del formulario
+    } catch (err) {
+      setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))
     }
   }
 
@@ -237,6 +241,8 @@ export const EditProduct = () => {
           <ProductName>{displayName}</ProductName>
         </ProductInfo>
       </ProductHeader>
+
+      {photoError && <Alert severity="error">{photoError}</Alert>}
 
       <SectionTitle>Datos del producto</SectionTitle>
 
@@ -354,7 +360,7 @@ export const EditProduct = () => {
         />
 
         <ButtonsRow>
-          <Button type="submit" variant="contained" fullWidth disabled={isSaving || isDeleting}>
+          <Button type="submit" variant="contained" fullWidth disabled={isSaving || isDeleting || isUploadingPhoto}>
             {isSaving ? <CircularProgress size={24} /> : 'Guardar'}
           </Button>
           <Button variant="outlined" color="error" fullWidth disabled={isSaving || isDeleting} onClick={handleDelete}>

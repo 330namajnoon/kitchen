@@ -1,10 +1,11 @@
 import type { ChangeEvent } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import Add from '@mui/icons-material/Add'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
+import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -18,6 +19,7 @@ import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { paths } from '@/routes/paths'
 import type { ProductLookupResponse, QuantityUnit } from '@/types/product'
 import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
+import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
 import {
   AddProductWrapper,
   CenteredState,
@@ -128,6 +130,7 @@ export const AddProduct = () => {
   const data = detectedProduct ?? lookupData
   const [addProduct, { isLoading: isSaving }] = useAddProductMutation()
   const [uploadProductPhoto, { isLoading: isUploadingPhoto }] = useUploadProductPhotoMutation()
+  const [photoError, setPhotoError] = useState<string | null>(null)
   const { data: genericProducts } = useGetGenericProductsQuery()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -215,10 +218,11 @@ export const AddProduct = () => {
     if (!file) return
 
     try {
+      setPhotoError(null)
       const { url } = await uploadProductPhoto(file).unwrap()
       formik.setFieldValue('photoUrl', url)
-    } catch {
-      // el error se muestra debajo del formulario
+    } catch (err) {
+      setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))
     }
   }
 
@@ -303,6 +307,8 @@ export const AddProduct = () => {
           )}
         </ProductInfo>
       </ProductHeader>
+
+      {photoError && <Alert severity="error">{photoError}</Alert>}
 
       <SectionTitle>Datos del producto</SectionTitle>
 
@@ -419,7 +425,7 @@ export const AddProduct = () => {
           fullWidth
         />
 
-        <Button type="submit" variant="contained" fullWidth disabled={isSaving}>
+        <Button type="submit" variant="contained" fullWidth disabled={isSaving || isUploadingPhoto}>
           {isSaving ? <CircularProgress size={24} /> : 'Guardar producto'}
         </Button>
       </Form>

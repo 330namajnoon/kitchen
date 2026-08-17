@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -9,6 +9,7 @@ import { useGetGenericProductsQuery } from '@/services/genericProductsApi'
 import { useAddRecipeMutation, useUploadRecipePhotoMutation } from '@/services/recipesApi'
 import { paths } from '@/routes/paths'
 import type { RecipeFormValues } from '@/types/recipe'
+import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
 import { AddRecipeWrapper, PageTitle } from './AddRecipe.styles'
 
 const DRAFT_STORAGE_KEY = 'kitchen:addRecipeDraft'
@@ -32,6 +33,7 @@ export const AddRecipe = () => {
   const { data: genericProducts } = useGetGenericProductsQuery()
   const [addRecipe, { isLoading: isSaving }] = useAddRecipeMutation()
   const [uploadPhoto, { isLoading: isUploadingPhoto }] = useUploadRecipePhotoMutation()
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   const formik = useFormik<RecipeFormValues>({
     initialValues: {
@@ -113,10 +115,11 @@ export const AddRecipe = () => {
 
   const handlePhotoSelected = async (file: File) => {
     try {
+      setPhotoError(null)
       const { url } = await uploadPhoto(file).unwrap()
       formik.setFieldValue('photoUrl', url)
-    } catch {
-      // el error se muestra debajo del formulario
+    } catch (err) {
+      setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))
     }
   }
 
@@ -130,8 +133,9 @@ export const AddRecipe = () => {
         onCreateGenericProduct={handleCreateGenericProduct}
         onPhotoSelected={handlePhotoSelected}
         isUploadingPhoto={isUploadingPhoto}
+        photoError={photoError}
         footer={
-          <Button type="submit" variant="contained" fullWidth disabled={isSaving}>
+          <Button type="submit" variant="contained" fullWidth disabled={isSaving || isUploadingPhoto}>
             {isSaving ? <CircularProgress size={24} /> : 'Guardar receta'}
           </Button>
         }

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Close from '@mui/icons-material/Close'
 import Delete from '@mui/icons-material/Delete'
@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Fab from '@mui/material/Fab'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
+import { useLongPress } from '@/hooks/useLongPress'
 import { useDeleteAvailableProductMutation, useGetAvailableProductsQuery } from '@/services/availableProductsApi'
 import { buildEditAvailableProductPath, buildPurchasePath } from '@/routes/paths'
 import {
@@ -24,17 +25,12 @@ import {
   SelectionBar,
 } from './AvailableProducts.styles'
 
-const LONG_PRESS_MS = 500
-
 export const AvailableProducts = () => {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const { data: availableProducts, isLoading, isError } = useGetAvailableProductsQuery()
   const [deleteAvailableProduct, { isLoading: isDeleting }] = useDeleteAvailableProductMutation()
-
-  const longPressTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const longPressTriggered = useRef(false)
 
   const isSelecting = selectedIds.length > 0
 
@@ -49,21 +45,10 @@ export const AvailableProducts = () => {
     setSelectedIds((current) => (current.includes(id) ? current.filter((selectedId) => selectedId !== id) : [...current, id]))
   }
 
-  const startLongPress = (id: number) => {
-    longPressTriggered.current = false
-    longPressTimer.current = setTimeout(() => {
-      longPressTriggered.current = true
-      toggleSelected(id)
-    }, LONG_PRESS_MS)
-  }
-
-  const cancelLongPress = () => {
-    clearTimeout(longPressTimer.current)
-  }
+  const { getHandlers, wasTriggered } = useLongPress<number>(toggleSelected)
 
   const handleCardClick = (availableProduct: NonNullable<typeof availableProducts>[number]) => {
-    if (longPressTriggered.current) {
-      longPressTriggered.current = false
+    if (wasTriggered()) {
       return
     }
 
@@ -140,12 +125,7 @@ export const AvailableProducts = () => {
                 $depleted={depleted}
                 $selected={selected}
                 onClick={() => handleCardClick(availableProduct)}
-                onMouseDown={() => startLongPress(availableProduct.id)}
-                onMouseUp={cancelLongPress}
-                onMouseLeave={cancelLongPress}
-                onTouchStart={() => startLongPress(availableProduct.id)}
-                onTouchEnd={cancelLongPress}
-                onContextMenu={(event) => event.preventDefault()}
+                {...getHandlers(availableProduct.id)}
               >
                 {availableProduct.product.photoUrl ? (
                   <ProductPhoto src={availableProduct.product.photoUrl} alt={displayName} />

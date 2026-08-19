@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Add from '@mui/icons-material/Add'
 import Close from '@mui/icons-material/Close'
@@ -8,6 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Fab from '@mui/material/Fab'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
+import { useLongPress } from '@/hooks/useLongPress'
 import { useGetRecipesQuery } from '@/services/recipesApi'
 import { buildAddShoppingListPath, buildCookPath, buildEditRecipePath, paths } from '@/routes/paths'
 import {
@@ -24,16 +25,11 @@ import {
   SelectionBar,
 } from './Recipes.styles'
 
-const LONG_PRESS_MS = 500
-
 export const Recipes = () => {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const { data: recipes, isLoading, isError } = useGetRecipesQuery()
-
-  const longPressTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const longPressTriggered = useRef(false)
 
   const isSelecting = selectedIds.length > 0
 
@@ -49,21 +45,10 @@ export const Recipes = () => {
     setSelectedIds((current) => (current.includes(id) ? current.filter((selectedId) => selectedId !== id) : [...current, id]))
   }
 
-  const startLongPress = (id: number) => {
-    longPressTriggered.current = false
-    longPressTimer.current = setTimeout(() => {
-      longPressTriggered.current = true
-      toggleSelected(id)
-    }, LONG_PRESS_MS)
-  }
-
-  const cancelLongPress = () => {
-    clearTimeout(longPressTimer.current)
-  }
+  const { getHandlers, wasTriggered } = useLongPress<number>(toggleSelected)
 
   const handleCardClick = (recipe: NonNullable<typeof recipes>[number]) => {
-    if (longPressTriggered.current) {
-      longPressTriggered.current = false
+    if (wasTriggered()) {
       return
     }
 
@@ -132,12 +117,7 @@ export const Recipes = () => {
                 key={recipe.id}
                 $selected={selected}
                 onClick={() => handleCardClick(recipe)}
-                onMouseDown={() => startLongPress(recipe.id)}
-                onMouseUp={cancelLongPress}
-                onMouseLeave={cancelLongPress}
-                onTouchStart={() => startLongPress(recipe.id)}
-                onTouchEnd={cancelLongPress}
-                onContextMenu={(event) => event.preventDefault()}
+                {...getHandlers(recipe.id)}
               >
                 {recipe.photoUrl ? <RecipePhoto src={recipe.photoUrl} alt={recipe.name} /> : <RecipePhotoPlaceholder />}
                 <RecipeName>{recipe.name}</RecipeName>

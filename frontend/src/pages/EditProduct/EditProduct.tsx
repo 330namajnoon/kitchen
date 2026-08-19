@@ -23,6 +23,7 @@ import { paths } from '@/routes/paths'
 import type { Product, QuantityUnit } from '@/types/product'
 import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
 import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
+import { compressImage } from '@/utils/compressImage'
 import {
   ButtonsRow,
   CenteredState,
@@ -164,7 +165,8 @@ export const EditProduct = () => {
 
     try {
       setPhotoError(null)
-      const { url } = await uploadProductPhoto(file).unwrap()
+      const compressedFile = await compressImage(file)
+      const { url } = await uploadProductPhoto(compressedFile).unwrap()
       formik.setFieldValue('photoUrl', url)
     } catch (err) {
       setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))

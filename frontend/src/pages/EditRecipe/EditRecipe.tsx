@@ -11,6 +11,7 @@ import { useDeleteRecipeMutation, useGetRecipesQuery, useUpdateRecipeMutation, u
 import { paths } from '@/routes/paths'
 import type { Recipe, RecipeFormValues } from '@/types/recipe'
 import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
+import { compressImage } from '@/utils/compressImage'
 import { CenteredState, EditRecipeWrapper, PageTitle } from './EditRecipe.styles'
 
 const DRAFT_STORAGE_KEY = 'kitchen:editRecipeDraft'
@@ -131,7 +132,8 @@ export const EditRecipe = () => {
   const handlePhotoSelected = async (file: File) => {
     try {
       setPhotoError(null)
-      const { url } = await uploadPhoto(file).unwrap()
+      const compressedFile = await compressImage(file)
+      const { url } = await uploadPhoto(compressedFile).unwrap()
       formik.setFieldValue('photoUrl', url)
     } catch (err) {
       setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))

@@ -4,6 +4,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDetectProductMutation } from '@/services/productDetectApi'
 import { buildAddProductPath, paths } from '@/routes/paths'
+import { compressImage } from '@/utils/compressImage'
 import {
   CaptureButton,
   CloseButton,
@@ -68,7 +69,8 @@ export const DetectProduct = () => {
 
     setErrorMessage(null)
     try {
-      const detected = await detectProduct(photo).unwrap()
+      const compressedPhoto = await compressImage(photo)
+      const detected = await detectProduct(compressedPhoto).unwrap()
       streamRef.current?.getTracks().forEach((track) => track.stop())
       const syntheticCode = `ia-${crypto.randomUUID()}`
       navigate(buildAddProductPath(syntheticCode), { state: { detectedProduct: detected, returnTo, presetGenericProductId } })

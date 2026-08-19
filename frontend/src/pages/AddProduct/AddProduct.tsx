@@ -20,6 +20,7 @@ import { paths } from '@/routes/paths'
 import type { ProductLookupResponse, QuantityUnit } from '@/types/product'
 import { findMatchingGenericProduct } from '@/utils/matchGenericProduct'
 import { getUploadErrorMessage } from '@/utils/getUploadErrorMessage'
+import { compressImage } from '@/utils/compressImage'
 import {
   AddProductWrapper,
   CenteredState,
@@ -66,7 +67,7 @@ const parseOffQuantity = (quantity: string): { amount: number; unit: QuantityUni
 const validationSchema = yup.object({
   name: yup.string().trim().required('El nombre es obligatorio'),
   photoUrl: yup.string(),
-  description: yup.string().trim().required('La descripción es obligatoria'),
+  description: yup.string(),
   category: yup.string().trim().required('La categoría es obligatoria'),
   quantityAmount: yup
     .number()
@@ -219,7 +220,8 @@ export const AddProduct = () => {
 
     try {
       setPhotoError(null)
-      const { url } = await uploadProductPhoto(file).unwrap()
+      const compressedFile = await compressImage(file)
+      const { url } = await uploadProductPhoto(compressedFile).unwrap()
       formik.setFieldValue('photoUrl', url)
     } catch (err) {
       setPhotoError(getUploadErrorMessage(err as Parameters<typeof getUploadErrorMessage>[0]))

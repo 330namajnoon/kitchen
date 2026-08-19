@@ -2,10 +2,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 import { env } from "@/config/env";
 
-// Alias mantenido por Google que siempre apunta al modelo flash recomendado vigente — evita
-// tener que actualizar el código cada vez que se deprecia una versión concreta (p.ej.
-// "gemini-2.5-flash" dejó de estar disponible para API keys nuevas).
-const GEMINI_MODEL = "gemini-flash-latest";
+// Fijado a una versión concreta en vez del alias "gemini-flash-latest": ese alias empezó a
+// devolver 500/503 de forma persistente (18/08/2026) mientras el modelo concreto funcionaba con
+// la misma API key. Si Google vuelve a deprecar esta versión, revisar los modelos disponibles en
+// https://aistudio.google.com/apikey.
+const GEMINI_MODEL = "gemini-3.6-flash";
 
 export class ProductDetectError extends Error {}
 

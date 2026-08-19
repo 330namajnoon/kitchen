@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import Close from '@mui/icons-material/Close'
@@ -12,8 +12,9 @@ import IconButton from '@mui/material/IconButton'
 import SpeedDial from '@mui/material/SpeedDial'
 import SpeedDialAction from '@mui/material/SpeedDialAction'
 import TextField from '@mui/material/TextField'
+import { useLongPress } from '@/hooks/useLongPress'
 import { useGetProductsQuery } from '@/services/productsApi'
-import { buildEditProductPath, buildPurchasePath, paths } from '@/routes/paths'
+import { buildAddProductPath, buildEditProductPath, buildPurchasePath, paths } from '@/routes/paths'
 import {
   CenteredState,
   PageTitle,
@@ -29,17 +30,12 @@ import {
 } from './Products.styles'
 import { Add } from '@mui/icons-material'
 
-const LONG_PRESS_MS = 500
-
 export const Products = () => {
   const navigate = useNavigate()
   const [addMenuOpen, setAddMenuOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const { data: products, isLoading, isError } = useGetProductsQuery()
-
-  const longPressTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const longPressTriggered = useRef(false)
 
   const isSelecting = selectedIds.length > 0
 
@@ -54,21 +50,10 @@ export const Products = () => {
     setSelectedIds((current) => (current.includes(id) ? current.filter((selectedId) => selectedId !== id) : [...current, id]))
   }
 
-  const startLongPress = (id: number) => {
-    longPressTriggered.current = false
-    longPressTimer.current = setTimeout(() => {
-      longPressTriggered.current = true
-      toggleSelected(id)
-    }, LONG_PRESS_MS)
-  }
-
-  const cancelLongPress = () => {
-    clearTimeout(longPressTimer.current)
-  }
+  const { getHandlers, wasTriggered } = useLongPress<number>(toggleSelected)
 
   const handleCardClick = (product: NonNullable<typeof products>[number]) => {
-    if (longPressTriggered.current) {
-      longPressTriggered.current = false
+    if (wasTriggered()) {
       return
     }
 
@@ -132,12 +117,7 @@ export const Products = () => {
                 key={product.id}
                 $selected={selected}
                 onClick={() => handleCardClick(product)}
-                onMouseDown={() => startLongPress(product.id)}
-                onMouseUp={cancelLongPress}
-                onMouseLeave={cancelLongPress}
-                onTouchStart={() => startLongPress(product.id)}
-                onTouchEnd={cancelLongPress}
-                onContextMenu={(event) => event.preventDefault()}
+                {...getHandlers(product.id)}
               >
                 {product.photoUrl ? (
                   <ProductPhoto src={product.photoUrl} alt={displayName} />
@@ -177,7 +157,10 @@ export const Products = () => {
               tooltip: { title: 'Añadir a mano', open: true },
               staticTooltipLabel: { sx: { whiteSpace: 'nowrap' } },
             }}
-            onClick={() => setAddMenuOpen(false)}
+            onClick={() => {
+              setAddMenuOpen(false)
+              navigate(buildAddProductPath(`manual-${crypto.randomUUID()}`), { state: { detectedProduct: {} } })
+            }}
           />
           <SpeedDialAction
             icon={<QrCodeScannerIcon />}
